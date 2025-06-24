@@ -56,9 +56,8 @@ return [
     'cache' => [
         'store' => env('LAMET_CACHE_STORE', 'redis'),
         'prefix' => env('LAMET_CACHE_PREFIX', 'metrics:'),
-        'ttl' => env('LAMET_CACHE_TTL', 3600), // should not be smaller than flush_interval
+        'ttl' => env('LAMET_CACHE_TTL', 3600),
         'batch_size' => env('LAMET_CACHE_BATCH_SIZE', 1000),
-        'flush_interval' => env('LAMET_CACHE_FLUSH_INTERVAL', 300),
     ],
 
     /*
@@ -71,5 +70,5 @@ return [
     |
     */
     'table' => env('LAMET_TABLE', 'metrics'),
-    'connection' => env('LAMET_DB_CONNECTION', 'pgsql'),
+    'connection' => 'lamet',
 ];

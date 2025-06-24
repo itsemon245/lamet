@@ -10,8 +10,6 @@
 
 A simple, high-performance package to record and aggregate metrics in Laravel applications, ready for Grafana dashboards.
 
-**Lamet** = **La**ravel + **Met**rics
-
 ## 📋 Table of Contents
 
 - [🚀 Installation](#-installation)
@@ -57,8 +55,42 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
 3. **Configure your database and cache:**
 
    - Set up your desired database connection in `config/database.php` (e.g., `sqlite`, `mysql`, `pgsql`). _Postgres is recommended_
-   - Set up your cache store in `config/cache.php` (e.g., `redis`).
-   - Update `config/lamet.php` to reference the correct `store`, `table`, and `connection` names.
+
+   ```php
+    'lamet' => [
+        'driver' => 'pgsql',
+        'url' => env('LAMET_DATABASE_URL'),
+        'host' => env('LAMET_DB_HOST', '127.0.0.1'),
+        'port' => env('LAMET_DB_PORT', '5432'),
+        'database' => env('LAMET_DB_DATABASE', 'lamet_metrics'),
+        'username' => env('LAMET_DB_USERNAME', 'root'),
+        'password' => env('LAMET_DB_PASSWORD', ''),
+        'charset' => 'utf8',
+        'prefix' => '',
+        'prefix_indexes' => true,
+        'search_path' => 'public',
+        'sslmode' => 'prefer',
+    ],
+   ```
+
+   - Create a new cache store or use an existing one from `config/cache.php` (e.g., `redis`).
+   - Add and update the .env variables for the new database connection
+
+   ```bash
+   #Database Connection
+   LAMET_DB_HOST=127.0.0.1
+   LAMET_DB_PORT=5432
+   LAMET_DB_DATABASE=lamet_metrics
+   LAMET_DB_USERNAME=root
+   LAMET_DB_PASSWORD=
+
+   #Other Config options (these are the defaults)
+   LAMET_CACHE_STORE=redis
+   LAMET_CACHE_PREFIX=metrics:
+   LAMET_CACHE_TTL=3600
+   LAMET_CACHE_BATCH_SIZE=1000
+   LAMET_LOG=false
+   ```
 
    > [!NOTE] > **Quick Setup**: Use the provided `misc/postgres-docker-compose.yml` example to quickly spin up a PostgreSQL container for development and testing.
 
@@ -224,7 +256,7 @@ The package configuration is located in `config/lamet.php`. You can customize th
 - `enabled`: Enable/disable metrics recording
 - `log_metrics`: Log metrics to Laravel's log system
 - `default_tags`: Default tags to add to all metrics
-- `cache`: Cache configuration (store, prefix, TTL, batch size, flush interval)
+- `cache`: Cache configuration (store, prefix, TTL, batch size)
 - `table`: Database table name for storing metrics
 - `connection`: Database connection to use (null to disable database storage)
 
@@ -236,14 +268,12 @@ You can configure the package using these environment variables:
 LAMET_ENABLED=true
 LAMET_LOG=false
 LAMET_TABLE=lamet
-LAMET_DB_CONNECTION=null
 
 # Cache Configuration
 LAMET_CACHE_STORE=redis
 LAMET_CACHE_PREFIX=lamet:
-LAMET_CACHE_TTL=3600 # must not be smaller than LAMET_CACHE_FLUSH_INTERVAL
+LAMET_CACHE_TTL=3600
 LAMET_CACHE_BATCH_SIZE=1000
-LAMET_CACHE_FLUSH_INTERVAL=300
 ```
 
 ## Cache System
@@ -261,7 +291,6 @@ The package includes a caching system that stores metrics in cache first, then p
 - `LAMET_CACHE_PREFIX`: Prefix for cache keys (default: lamet:)
 - `LAMET_CACHE_TTL`: Time to live for cached metrics (default: 3600 seconds)
 - `LAMET_CACHE_BATCH_SIZE`: Number of metrics to insert in one batch (default: 1000)
-- `LAMET_CACHE_FLUSH_INTERVAL`: How often to flush metrics (default: 300 seconds)
 
 ## Scheduled Tasks
 
@@ -274,7 +303,7 @@ protected function schedule(Schedule $schedule): void
     $schedule->command('lamet:flush')->everyFiveMinutes();
 
     // Clean old metrics daily at 2 AM (keep last 90 days)
-    $schedule->command('lamet:clean --days=90 --force')->dailyAt('02:00');
+    // $schedule->command('lamet:clean --days=90 --force')->dailyAt('02:00');
 }
 ```
 

@@ -5,10 +5,10 @@ namespace Itsemon245\Lamet\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static void record(string $name, float $value, array $tags = [])
- * @method static void increment(string $name, int $value = 1, array $tags = [])
- * @method static void decrement(string $name, int $value = 1, array $tags = [])
- * @method static mixed time(string $name, callable $callback, array $tags = [])
+ * @method static void record(string $name, float $value, array $tags = [], ?string $type = null, ?string $unit = null)
+ * @method static void increment(string $name, int $value = 1, array $tags = [], ?string $type = null, ?string $unit = null)
+ * @method static void decrement(string $name, int $value = 1, array $tags = [], ?string $type = null, ?string $unit = null)
+ * @method static mixed time(string $name, callable $callback, array $tags = [], ?string $type = null, ?string $unit = 'ms')
  * @method static int flush()
  * @method static array getMetrics(array $filters = [])
  * @method static int clean(int $daysToKeep = 30)

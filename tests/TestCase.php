@@ -48,7 +48,6 @@ abstract class TestCase extends Orchestra
         $app['config']->set('lamet.cache.prefix', 'lamet_test:');
         $app['config']->set('lamet.cache.ttl', 3600);
         $app['config']->set('lamet.cache.batch_size', 100);
-        $app['config']->set('lamet.cache.flush_interval', 300);
         $app['config']->set('lamet.default_tags', [
             'environment' => 'testing',
             'app_name' => 'lamet-test',
