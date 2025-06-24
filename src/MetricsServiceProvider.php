@@ -34,7 +34,7 @@ class MetricsServiceProvider extends ServiceProvider
             ], 'lamet-config');
 
             $this->publishes([
-                __DIR__.'/../database/migrations' => database_path('migrations/lamet'),
+                __DIR__.'/../database/migrations' => database_path('migrations'),
             ], 'lamet-migrations');
 
             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');

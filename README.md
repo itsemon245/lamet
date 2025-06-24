@@ -1,4 +1,4 @@
-![Laravel Lamet Banner](https://via.placeholder.com/1200x400/667eea/ffffff?text=Laravel+Lamet)
+![Laravel Lamet Banner](https://placehold.co/1200x400/667eea/white?text=LAMET&font=Raleway)
 
 <p align="center">
  <a href="https://packagist.org/packages/itsemon245/lamet"><img src="https://img.shields.io/packagist/dt/itsemon245/lamet?style=for-the-badge&label=Downloads&color=61C9A8" alt="Total Downloads"></a>
@@ -51,6 +51,13 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
    ```
 
    This will publish `config/lamet.php` and the migration to `database/migrations/lamet/`.
+
+   Alternatively, you can publish them separately:
+
+   ```bash
+   php artisan vendor:publish --tag=lamet-config
+   php artisan vendor:publish --tag=lamet-migrations
+   ```
 
 3. **Configure your database and cache:**
 
