@@ -17,7 +17,7 @@ trait HasMetricsDatabase
         }
 
         $connection = $this->config['connection'] ?? null;
-        $tableName = $this->config['table'] ?? 'lamet';
+        $tableName = $this->config['table'] ?? 'metrics';
         if (! $connection) {
             // If no connection is set, do not store metrics
             return;

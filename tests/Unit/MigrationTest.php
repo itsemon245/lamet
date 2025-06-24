@@ -7,14 +7,20 @@ use Itsemon245\Lamet\Tests\TestCase;
 
 class MigrationTest extends TestCase
 {
-    public function test_lamet_table_is_created()
+    /**
+     * Test that the metrics table is created.
+     */
+    public function test_metrics_table_is_created()
     {
-        $this->assertTrue(Schema::connection('testing')->hasTable('lamet'));
+        $this->assertTrue(Schema::connection('testing')->hasTable($this->getMetricsTableName()));
     }
 
-    public function test_lamet_table_has_required_columns()
+    /**
+     * Test that the metrics table has all required columns.
+     */
+    public function test_metrics_table_has_required_columns()
     {
-        $columns = Schema::connection('testing')->getColumnListing('lamet');
+        $columns = Schema::connection('testing')->getColumnListing($this->getMetricsTableName());
 
         $requiredColumns = [
             'id',
@@ -29,18 +35,21 @@ class MigrationTest extends TestCase
         ];
 
         foreach ($requiredColumns as $column) {
-            $this->assertContains($column, $columns, "Column {$column} should exist in lamet table");
+            $this->assertContains($column, $columns, "Column {$column} should exist in {$this->getMetricsTableName()} table");
         }
     }
 
-    public function test_lamet_table_has_indexes()
+    /**
+     * Test that the metrics table has required indexes.
+     */
+    public function test_metrics_table_has_indexes()
     {
-        $indexes = Schema::connection('testing')->getIndexes('lamet');
+        $indexes = Schema::connection('testing')->getIndexes($this->getMetricsTableName());
 
         // Check for basic indexes
         $indexNames = array_column($indexes, 'name');
 
-        $this->assertContains('lamet_name_time_idx', $indexNames);
-        $this->assertContains('lamet_type_time_idx', $indexNames);
+        $this->assertContains($this->getMetricsTableName().'_name_time_idx', $indexNames);
+        $this->assertContains($this->getMetricsTableName().'_type_time_idx', $indexNames);
     }
 }

@@ -62,4 +62,24 @@ abstract class TestCase extends Orchestra
     {
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
+
+    /**
+     * Get the metrics table name for tests (from config, env, or default).
+     */
+    protected function getMetricsTableName(): string
+    {
+        // Try config first (Laravel config helper)
+        $table = config('lamet.table');
+        if ($table) {
+            return $table;
+        }
+        // Try environment variable
+        $envTable = env('LAMET_TABLE');
+        if ($envTable) {
+            return $envTable;
+        }
+
+        // Fallback
+        return 'metrics';
+    }
 }

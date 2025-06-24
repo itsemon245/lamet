@@ -20,9 +20,9 @@
         <env name="CACHE_DRIVER" value="array"/>
         <env name="LAMET_ENABLED" value="true"/>
         <env name="LAMET_LOG" value="false"/>
-        <env name="LAMET_TABLE" value="lamet"/>
+        <env name="LAMET_TABLE" value="metrics"/>
         <env name="LAMET_DB_CONNECTION" value="testing"/>
         <env name="LAMET_CACHE_STORE" value="array"/>
-        <env name="LAMET_CACHE_PREFIX" value="lamet_test:"/>
+        <env name="LAMET_CACHE_PREFIX" value="test_metrics:"/>
     </php>
 </phpunit> 
