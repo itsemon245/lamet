@@ -58,7 +58,7 @@ trait HasMetricsLogging
      */
     protected function getLogChannel(): string
     {
-        return $this->config['drivers']['log']['channel'] ?? 'daily';
+        return $this->app['config']['logging']['default'] ?? 'daily';
     }
 
     protected function logger(string $message, array $context = [])

@@ -55,9 +55,6 @@ class MetricsManager
 
         $this->logger('Metrics enabled, proceeding');
 
-        $channel = $this->getLogChannel();
-        Log::channel($channel)->info('Is logging enabled: '.$this->isLoggingEnabled());
-
         // Check if we should ignore this metric based on current request path
         if ($this->shouldIgnorePath()) {
             $this->logger('Path should be ignored, returning null');
@@ -92,8 +89,6 @@ class MetricsManager
         } else {
             $this->logger('Logging disabled, skipping logMetric');
         }
-
-        Log::channel($channel)->info('Cache key: '.$cacheKey);
 
         $this->logger('Record method completed', ['cache_key' => $cacheKey]);
 
