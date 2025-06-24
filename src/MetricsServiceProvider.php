@@ -49,5 +49,38 @@ class MetricsServiceProvider extends ServiceProvider
 
         // Register the facade
         Facade::clearResolvedInstances();
+
+        // Register automatic event listeners
+        $this->registerEventListeners();
+    }
+
+    /**
+     * Register automatic event listeners for metrics tracking.
+     */
+    protected function registerEventListeners(): void
+    {
+        $config = $this->app['config']->get('lamet', []);
+
+        // Register database query listener if enabled
+        if ($config['db_query']['enabled'] ?? true) {
+            $this->app['events']->listen(
+                \Illuminate\Database\Events\QueryExecuted::class,
+                function (\Illuminate\Database\Events\QueryExecuted $event) {
+                    $this->app['lamet']->dbQuery($event);
+                }
+            );
+        }
+
+        // Register exception listener if enabled
+        if ($config['exception']['enabled'] ?? true) {
+            $this->app['events']->listen(
+                \Illuminate\Log\Events\MessageLogged::class,
+                function (\Illuminate\Log\Events\MessageLogged $event) {
+                    if ($event->level === 'error' && $event->context['exception'] ?? null) {
+                        $this->app['lamet']->exception($event->context['exception']);
+                    }
+                }
+            );
+        }
     }
 }

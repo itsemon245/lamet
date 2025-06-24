@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static void increment(string $name, int $value = 1, array $tags = [], ?string $type = null, ?string $unit = null)
  * @method static void decrement(string $name, int $value = 1, array $tags = [], ?string $type = null, ?string $unit = null)
  * @method static mixed time(string $name, callable $callback, array $tags = [], ?string $type = null, ?string $unit = 'ms')
+ * @method static void dbQuery(\Illuminate\Database\Events\QueryExecuted $event, array $additionalTags = [], ?string $name = null)
+ * @method static void exception(\Throwable $throwable, array $additionalTags = [], ?string $name = null)
  * @method static int flush()
  * @method static array getMetrics(array $filters = [])
  * @method static int clean(int $daysToKeep = 30)
