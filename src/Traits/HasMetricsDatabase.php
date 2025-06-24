@@ -1,6 +1,6 @@
 <?php
 
-namespace Itsemon245\Metrics\Traits;
+namespace Itsemon245\Lamet\Traits;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +17,7 @@ trait HasMetricsDatabase
         }
 
         $connection = $this->config['connection'] ?? null;
-        $tableName = $this->config['table'] ?? 'metrics';
+        $tableName = $this->config['table'] ?? 'lamet';
         if (! $connection) {
             // If no connection is set, do not store metrics
             return;

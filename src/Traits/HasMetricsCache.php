@@ -1,6 +1,6 @@
 <?php
 
-namespace Itsemon245\Metrics\Traits;
+namespace Itsemon245\Lamet\Traits;
 
 use Illuminate\Support\Facades\Cache;
 
@@ -107,7 +107,7 @@ trait HasMetricsCache
      */
     protected function getCachePrefix(): string
     {
-        return $this->config['cache']['prefix'] ?? 'metrics:';
+        return $this->config['cache']['prefix'] ?? 'lamet:';
     }
 
     /**

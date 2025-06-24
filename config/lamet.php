@@ -3,10 +3,10 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Metrics Configuration
+    | Lamet Configuration
     |--------------------------------------------------------------------------
     |
-    | This file contains the configuration for the Laravel Metrics package.
+    | This file contains the configuration for the Laravel Lamet package.
     | You can customize these settings based on your needs.
     |
     */
@@ -19,7 +19,7 @@ return [
     | Set this to false to disable all metrics recording.
     |
     */
-    'enabled' => env('METRICS_ENABLED', true),
+    'enabled' => env('LAMET_ENABLED', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -30,7 +30,7 @@ return [
     | This is useful for debugging and development.
     |
     */
-    'log_metrics' => env('METRICS_LOG', false),
+    'log_metrics' => env('LAMET_LOG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -54,11 +54,11 @@ return [
     |
     */
     'cache' => [
-        'store' => env('METRICS_CACHE_STORE', 'redis'),
-        'prefix' => env('METRICS_CACHE_PREFIX', 'metrics:'),
-        'ttl' => env('METRICS_CACHE_TTL', 3600), // should not be smaller than flush_interval
-        'batch_size' => env('METRICS_CACHE_BATCH_SIZE', 1000),
-        'flush_interval' => env('METRICS_CACHE_FLUSH_INTERVAL', 300),
+        'store' => env('LAMET_CACHE_STORE', 'redis'),
+        'prefix' => env('LAMET_CACHE_PREFIX', 'metrics:'),
+        'ttl' => env('LAMET_CACHE_TTL', 3600), // should not be smaller than flush_interval
+        'batch_size' => env('LAMET_CACHE_BATCH_SIZE', 1000),
+        'flush_interval' => env('LAMET_CACHE_FLUSH_INTERVAL', 300),
     ],
 
     /*
@@ -70,6 +70,6 @@ return [
     | metrics will not be stored in the database.
     |
     */
-    'table' => env('METRICS_TABLE', 'metrics'),
-    'connection' => env('METRICS_DB_CONNECTION', null),
+    'table' => env('LAMET_TABLE', 'metrics'),
+    'connection' => env('LAMET_DB_CONNECTION', 'pgsql'),
 ];

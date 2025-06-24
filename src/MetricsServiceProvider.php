@@ -1,6 +1,6 @@
 <?php
 
-namespace Itsemon245\Metrics;
+namespace Itsemon245\Lamet;
 
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
@@ -13,14 +13,14 @@ class MetricsServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/metrics.php', 'metrics'
+            __DIR__.'/../config/lamet.php', 'lamet'
         );
 
-        $this->app->singleton('metrics', function ($app) {
+        $this->app->singleton('lamet', function ($app) {
             return new MetricsManager($app);
         });
 
-        $this->app->alias('metrics', MetricsManager::class);
+        $this->app->alias('lamet', MetricsManager::class);
     }
 
     /**
@@ -30,20 +30,20 @@ class MetricsServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/metrics.php' => config_path('metrics.php'),
-            ], 'metrics-config');
+                __DIR__.'/../config/lamet.php' => config_path('lamet.php'),
+            ], 'lamet-config');
 
             $this->publishes([
-                __DIR__.'/../database/migrations' => database_path('migrations/metrics'),
-            ], 'metrics-migrations');
+                __DIR__.'/../database/migrations' => database_path('migrations/lamet'),
+            ], 'lamet-migrations');
 
             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
             // Register commands
             $this->commands([
-                Console\Commands\MetricsInstallCommand::class,
-                Console\Commands\MetricsFlushCommand::class,
-                Console\Commands\MetricsCleanCommand::class,
+                Console\Commands\LametInstallCommand::class,
+                Console\Commands\LametFlushCommand::class,
+                Console\Commands\LametCleanCommand::class,
             ]);
         }
 

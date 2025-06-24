@@ -1,14 +1,16 @@
-![Laravel Metrics Banner](https://via.placeholder.com/1200x400/667eea/ffffff?text=Laravel+Metrics)
+![Laravel Lamet Banner](https://via.placeholder.com/1200x400/667eea/ffffff?text=Laravel+Lamet)
 
 <p align="center">
- <a href="https://packagist.org/packages/itsemon245/laravel-metrics"><img src="https://img.shields.io/packagist/dt/itsemon245/laravel-metrics?style=for-the-badge&label=Downloads&color=61C9A8" alt="Total Downloads"></a>
- <a href="https://packagist.org/packages/itsemon245/laravel-metrics"><img src="https://img.shields.io/packagist/v/itsemon245/laravel-metrics?style=for-the-badge&label=Version" alt="Latest Stable Version"></a>
- <a href="https://packagist.org/packages/itsemon245/laravel-metrics"><img src="https://img.shields.io/packagist/l/itsemon245/laravel-metrics?style=for-the-badge&label=License" alt="License"></a>
+ <a href="https://packagist.org/packages/itsemon245/lamet"><img src="https://img.shields.io/packagist/dt/itsemon245/lamet?style=for-the-badge&label=Downloads&color=61C9A8" alt="Total Downloads"></a>
+ <a href="https://packagist.org/packages/itsemon245/lamet"><img src="https://img.shields.io/packagist/v/itsemon245/lamet?style=for-the-badge&label=Version" alt="Latest Stable Version"></a>
+ <a href="https://packagist.org/packages/itsemon245/lamet"><img src="https://img.shields.io/packagist/l/itsemon245/lamet?style=for-the-badge&label=License" alt="License"></a>
 </p>
 
-# Laravel Metrics
+# Laravel Lamet (Laravel + Metrics)
 
 A simple, high-performance package to record and aggregate metrics in Laravel applications, ready for Grafana dashboards.
+
+**Lamet** = **La**ravel + **Met**rics
 
 ## 📋 Table of Contents
 
@@ -20,9 +22,9 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
 - [📝 Notes](#-notes)
 - [📚 More](#-more)
 - [Commands](#commands)
-  - [metrics:install](#metricsinstall)
-  - [metrics:flush](#metricsflush)
-  - [metrics:clean](#metricsclean)
+  - [lamet:install](#lametinstall)
+  - [lamet:flush](#lametflush)
+  - [lamet:clean](#lametclean)
 - [Configuration](#configuration)
 - [Environment Variables](#environment-variables)
 - [Cache System](#cache-system)
@@ -41,24 +43,24 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
 1. **Install via Composer:**
 
    ```bash
-   composer require itsemon245/laravel-metrics
+   composer require itsemon245/lamet
    ```
 
 2. **Publish the configuration and migration:**
 
    ```bash
-   php artisan metrics:install
+   php artisan lamet:install
    ```
 
-   This will publish `config/metrics.php` and the migration to `database/migrations/metrics/`.
+   This will publish `config/lamet.php` and the migration to `database/migrations/lamet/`.
 
 3. **Configure your database and cache:**
 
    - Set up your desired database connection in `config/database.php` (e.g., `sqlite`, `mysql`, `pgsql`). _Postgres is recommended_
    - Set up your cache store in `config/cache.php` (e.g., `redis`).
-   - Update `config/metrics.php` to reference the correct `store`, `table`, and `connection` names.
+   - Update `config/lamet.php` to reference the correct `store`, `table`, and `connection` names.
 
-   > [!NOTE] > **Quick Setup**: Use the provided `misc/postgres-docker-compose.yml` example to quickly spin up a PostgreSQL container for development and testing and even production.
+   > [!NOTE] > **Quick Setup**: Use the provided `misc/postgres-docker-compose.yml` example to quickly spin up a PostgreSQL container for development and testing.
 
 4. **Run the migration:**
 
@@ -71,7 +73,7 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
    ```php
    protected function schedule(Schedule $schedule): void
    {
-       $schedule->command('metrics:flush')->everyFiveMinutes();
+       $schedule->command('lamet:flush')->everyFiveMinutes();
    }
    ```
 
@@ -80,7 +82,7 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
 ### Using the Facade
 
 ```php
-use Itsemon245\Metrics\Facades\Metrics;
+use Itsemon245\Lamet\Facades\Metrics;
 
 // Record a metric (e.g., exception occurrence)
 Metrics::increment('exception.occurrence', 1, [
@@ -138,7 +140,7 @@ metrics_clean(30); // Keep last 30 days
 ### Using Dependency Injection
 
 ```php
-use Itsemon245\Metrics\MetricsManager;
+use Itsemon245\Lamet\MetricsManager;
 
 class UserController extends Controller
 {
@@ -172,42 +174,42 @@ For advanced usage and query examples, see:
 
 ## 📚 More
 
-- See the published `config/metrics.php` for all options.
+- See the published `config/lamet.php` for all options.
 - See the migration for the table structure.
 - For advanced usage, see the helper functions and artisan commands provided.
 
 ## Commands
 
-### `metrics:install`
+### `lamet:install`
 
 Installs the package by publishing configuration and migration files.
 
 ```bash
-php artisan metrics:install
+php artisan lamet:install
 ```
 
 Options:
 
 - `--force`: Overwrite existing files
 
-### `metrics:flush`
+### `lamet:flush`
 
 Flushes cached metrics to the database.
 
 ```bash
-php artisan metrics:flush
+php artisan lamet:flush
 ```
 
 Options:
 
 - `--force`: Force flush even if cache is disabled
 
-### `metrics:clean`
+### `lamet:clean`
 
 Cleans old metrics from the database.
 
 ```bash
-php artisan metrics:clean
+php artisan lamet:clean
 ```
 
 Options:
@@ -217,7 +219,7 @@ Options:
 
 ## Configuration
 
-The package configuration is located in `config/metrics.php`. You can customize the following options:
+The package configuration is located in `config/lamet.php`. You can customize the following options:
 
 - `enabled`: Enable/disable metrics recording
 - `log_metrics`: Log metrics to Laravel's log system
@@ -231,17 +233,17 @@ The package configuration is located in `config/metrics.php`. You can customize 
 You can configure the package using these environment variables:
 
 ```env
-METRICS_ENABLED=true
-METRICS_LOG=false
-METRICS_TABLE=metrics
-METRICS_DB_CONNECTION=null
+LAMET_ENABLED=true
+LAMET_LOG=false
+LAMET_TABLE=lamet
+LAMET_DB_CONNECTION=null
 
 # Cache Configuration
-METRICS_CACHE_STORE=redis
-METRICS_CACHE_PREFIX=metrics:
-METRICS_CACHE_TTL=3600 # must not be smaller than METRICS_CACHE_FLUSH_INTERVAL
-METRICS_CACHE_BATCH_SIZE=1000
-METRICS_CACHE_FLUSH_INTERVAL=300
+LAMET_CACHE_STORE=redis
+LAMET_CACHE_PREFIX=lamet:
+LAMET_CACHE_TTL=3600 # must not be smaller than LAMET_CACHE_FLUSH_INTERVAL
+LAMET_CACHE_BATCH_SIZE=1000
+LAMET_CACHE_FLUSH_INTERVAL=300
 ```
 
 ## Cache System
@@ -255,11 +257,11 @@ The package includes a caching system that stores metrics in cache first, then p
 
 ### Cache Configuration
 
-- `METRICS_CACHE_STORE`: Cache store to use (default: redis)
-- `METRICS_CACHE_PREFIX`: Prefix for cache keys (default: metrics:)
-- `METRICS_CACHE_TTL`: Time to live for cached metrics (default: 3600 seconds)
-- `METRICS_CACHE_BATCH_SIZE`: Number of metrics to insert in one batch (default: 1000)
-- `METRICS_CACHE_FLUSH_INTERVAL`: How often to flush metrics (default: 300 seconds)
+- `LAMET_CACHE_STORE`: Cache store to use (default: redis)
+- `LAMET_CACHE_PREFIX`: Prefix for cache keys (default: lamet:)
+- `LAMET_CACHE_TTL`: Time to live for cached metrics (default: 3600 seconds)
+- `LAMET_CACHE_BATCH_SIZE`: Number of metrics to insert in one batch (default: 1000)
+- `LAMET_CACHE_FLUSH_INTERVAL`: How often to flush metrics (default: 300 seconds)
 
 ## Scheduled Tasks
 
@@ -269,10 +271,10 @@ Add these to your `app/Console/Kernel.php` to automatically flush and clean metr
 protected function schedule(Schedule $schedule): void
 {
     // Flush metrics every 5 minutes
-    $schedule->command('metrics:flush')->everyFiveMinutes();
+    $schedule->command('lamet:flush')->everyFiveMinutes();
 
     // Clean old metrics daily at 2 AM (keep last 90 days)
-    $schedule->command('metrics:clean --days=90 --force')->dailyAt('02:00');
+    $schedule->command('lamet:clean --days=90 --force')->dailyAt('02:00');
 }
 ```
 
@@ -331,7 +333,7 @@ Set up Grafana alerts based on your metrics:
 ```sql
 -- High response time alert
 SELECT avg(value) as avg_response_time
-FROM metrics
+FROM lamet
 WHERE name = 'api.response_time'
   AND recorded_at >= now() - interval '5 minutes'
 HAVING avg(value) > 1000;  -- Alert if > 1 second

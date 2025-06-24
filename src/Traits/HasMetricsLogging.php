@@ -1,6 +1,6 @@
 <?php
 
-namespace Itsemon245\Metrics\Traits;
+namespace Itsemon245\Lamet\Traits;
 
 use Illuminate\Support\Facades\Log;
 

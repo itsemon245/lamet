@@ -1,6 +1,6 @@
 <?php
 
-namespace Itsemon245\Metrics\Facades;
+namespace Itsemon245\Lamet\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static int clean(int $daysToKeep = 30)
  * @method static array getConfig()
  *
- * @see \Itsemon245\Metrics\MetricsManager
+ * @see \Itsemon245\Lamet\MetricsManager
  */
 class Metrics extends Facade
 {
@@ -23,6 +23,6 @@ class Metrics extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return 'metrics';
+        return 'lamet';
     }
 }

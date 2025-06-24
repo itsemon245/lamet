@@ -1,14 +1,31 @@
 {
-    "name": "itsemon245/laravel-metrics",
-    "description": "A simple package to record metrics in production at scale",
+    "name": "itsemon245/lamet",
+    "description": "A high-performance Laravel metrics collection package with caching, aggregation, and Grafana integration for production monitoring",
     "type": "library",
+    "keywords": [
+        "laravel",
+        "metrics",
+        "monitoring",
+        "telemetry",
+        "grafana",
+        "performance",
+        "analytics",
+        "dashboard",
+        "time-series",
+        "observability",
+        "logging",
+        "cache",
+        "aggregation",
+        "production",
+        "laravel-package"
+    ],
     "require-dev": {
         "orchestra/testbench": "^10.4"
     },
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Itsemon245\\Metrics\\": "src/"
+            "Itsemon245\\Lamet\\": "src/"
         },
         "files": [
             "src/Support/helpers.php"
@@ -16,7 +33,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Itsemon245\\Metrics\\Tests\\": "tests/"
+            "Itsemon245\\Lamet\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -26,7 +43,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Itsemon245\\Metrics\\MetricsServiceProvider"
+                "Itsemon245\\Lamet\\MetricsServiceProvider"
             ]
         }
     },

@@ -1,16 +1,16 @@
 <?php
 
-namespace Itsemon245\Metrics\Console\Commands;
+namespace Itsemon245\Lamet\Console\Commands;
 
 use Illuminate\Console\Command;
-use Itsemon245\Metrics\MetricsManager;
+use Itsemon245\Lamet\MetricsManager;
 
-class MetricsFlushCommand extends Command
+class LametFlushCommand extends Command
 {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'metrics:flush {--force : Force flush even if cache is disabled}';
+    protected $signature = 'lamet:flush {--force : Force flush even if cache is disabled}';
 
     /**
      * The console command description.

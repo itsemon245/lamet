@@ -1,11 +1,11 @@
 <?php
 
-namespace Itsemon245\Metrics;
+namespace Itsemon245\Lamet;
 
 use Illuminate\Contracts\Foundation\Application;
-use Itsemon245\Metrics\Traits\HasMetricsCache;
-use Itsemon245\Metrics\Traits\HasMetricsDatabase;
-use Itsemon245\Metrics\Traits\HasMetricsLogging;
+use Itsemon245\Lamet\Traits\HasMetricsCache;
+use Itsemon245\Lamet\Traits\HasMetricsDatabase;
+use Itsemon245\Lamet\Traits\HasMetricsLogging;
 
 class MetricsManager
 {
@@ -17,7 +17,7 @@ class MetricsManager
     protected Application $app;
 
     /**
-     * The metrics configuration.
+     * The lamet configuration.
      */
     protected array $config;
 
@@ -27,7 +27,7 @@ class MetricsManager
     public function __construct(Application $app)
     {
         $this->app = $app;
-        $this->config = $app['config']->get('metrics', []);
+        $this->config = $app['config']->get('lamet', []);
     }
 
     /**

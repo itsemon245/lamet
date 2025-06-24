@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Schema\Blueprint;
-use Itsemon245\Metrics\Database\Migrations\MetricsMigration;
+use Itsemon245\Lamet\Database\Migrations\MetricsMigration;
 
 return new class extends MetricsMigration
 {

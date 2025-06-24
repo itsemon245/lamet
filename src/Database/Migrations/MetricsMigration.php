@@ -1,6 +1,6 @@
 <?php
 
-namespace Itsemon245\Metrics\Database\Migrations;
+namespace Itsemon245\Lamet\Database\Migrations;
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -13,7 +13,7 @@ abstract class MetricsMigration extends Migration
      */
     public function getConnection(): ?string
     {
-        return config('metrics.drivers.database.connection', 'sqlite');
+        return config('lamet.drivers.database.connection', 'sqlite');
     }
 
     /**
@@ -35,7 +35,7 @@ abstract class MetricsMigration extends Migration
      */
     final public function getTableName(): string
     {
-        return config('metrics.drivers.database.table', 'metrics');
+        return config('lamet.drivers.database.table', 'lamet');
     }
 
     /**

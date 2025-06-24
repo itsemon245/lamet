@@ -1,6 +1,6 @@
 <?php
 
-use Itsemon245\Metrics\Facades\Metrics;
+use Itsemon245\Lamet\Facades\Metrics;
 
 if (! function_exists('metrics')) {
     /**
