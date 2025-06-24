@@ -1,0 +1,41 @@
+{
+    "name": "itsemon245/laravel-metrics",
+    "description": "A simple package to record metrics in production at scale",
+    "type": "library",
+    "require-dev": {
+        "orchestra/testbench": "^10.4"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Itsemon245\\Metrics\\": "src/"
+        },
+        "files": [
+            "src/Support/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Itsemon245\\Metrics\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-f": "vendor/bin/phpunit --filter"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Itsemon245\\Metrics\\MetricsServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "Mojahidul Islam",
+            "email": "itsemon245@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}

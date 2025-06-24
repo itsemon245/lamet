@@ -1,0 +1,28 @@
+<?php
+
+namespace Itsemon245\Metrics\Facades;
+
+use Illuminate\Support\Facades\Facade;
+
+/**
+ * @method static void record(string $name, float $value, array $tags = [])
+ * @method static void increment(string $name, int $value = 1, array $tags = [])
+ * @method static void decrement(string $name, int $value = 1, array $tags = [])
+ * @method static mixed time(string $name, callable $callback, array $tags = [])
+ * @method static int flush()
+ * @method static array getMetrics(array $filters = [])
+ * @method static int clean(int $daysToKeep = 30)
+ * @method static array getConfig()
+ *
+ * @see \Itsemon245\Metrics\MetricsManager
+ */
+class Metrics extends Facade
+{
+    /**
+     * Get the registered name of the component.
+     */
+    protected static function getFacadeAccessor(): string
+    {
+        return 'metrics';
+    }
+}
