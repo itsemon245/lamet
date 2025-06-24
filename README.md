@@ -105,8 +105,10 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
    ```bash
    php artisan migrate
    ```
-
-5. **(Optional) Schedule periodic flushing:**
+> [!IMPORTANT]
+> The 5th step is very important. If you skip this your metrics won't be saved in the database.
+> Also keep in mind that you have to set the frequency lower than the ttl value in `config/lamet.php`
+5. **Schedule periodic flushing:**
    In `app/Console/Kernel.php`:
    ```php
    protected function schedule(Schedule $schedule): void
@@ -114,6 +116,10 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
        $schedule->command('lamet:flush')->everyFiveMinutes();
    }
    ```
+>[!TIP]
+> Higher frequency means less granularity, not suitable for realtime metrics but lower memory usage
+> Lower frequency means more granularity, suitable for realtime metrics but higher memory usage
+> Keep it between 5-20 minutes in general.
 
 ## ✨ Usage
 
@@ -220,7 +226,7 @@ The package configuration is located in `config/lamet.php`. You can customize th
 
 ### Database Query Monitoring
 
-- `db_query.enabled`: Enable/disable database query monitoring
+- `db_query.enabled`: Enable/disable auto database query monitoring
 - `db_query.metric_name`: Name for database query metrics
 - `db_query.tags`: Tags to include with database queries
 - `db_query.separate_metric_for_slow_query`: Create separate metrics for slow queries
@@ -228,7 +234,7 @@ The package configuration is located in `config/lamet.php`. You can customize th
 
 ### Exception Monitoring
 
-- `exception.enabled`: Enable/disable exception monitoring
+- `exception.enabled`: Enable/disable auto exception monitoring
 - `exception.metric_name`: Name for exception metrics
 - `exception.tags`: Tags to include with exception metrics
 
@@ -277,7 +283,7 @@ The package includes a caching system that stores metrics in cache first, then p
 ### Cache Configuration
 
 - `LAMET_CACHE_STORE`: Cache store to use (default: redis)
-- `LAMET_CACHE_PREFIX`: Prefix for cache keys (default: lamet:)
+- `LAMET_CACHE_PREFIX`: Prefix for cache keys (default: metrics:)
 - `LAMET_CACHE_TTL`: Time to live for cached metrics (default: 3600 seconds)
 - `LAMET_CACHE_BATCH_SIZE`: Number of metrics to insert in one batch (default: 1000)
 

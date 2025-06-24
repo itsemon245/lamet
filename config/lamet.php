@@ -72,7 +72,7 @@ return [
     |
     */
     'exception' => [
-        'enabled' => env('LAMET_EXCEPTION_ENABLED', true),
+        'enabled' => env('LAMET_EXCEPTION_ENABLED', false),// auto query listener is less accurate please follow the docs to get a more accurate exception metrics
         'metric_name' => 'exception.occurrence',
         'tags' => ['exception_class', 'message', 'file', 'line', 'code', 'trace'],
         'trace_lines' => 15, // number of lines to take from the trace
@@ -125,7 +125,7 @@ return [
     'cache' => [
         'store' => env('LAMET_CACHE_STORE', 'redis'),
         'prefix' => env('LAMET_CACHE_PREFIX', 'metrics:'),
-        'ttl' => env('LAMET_CACHE_TTL', 3600),
+        'ttl' => env('LAMET_CACHE_TTL', 3600), // make sure it is greater then lamet:flush comand interval in the scheduler
         'batch_size' => env('LAMET_CACHE_BATCH_SIZE', 1000),
     ],
 

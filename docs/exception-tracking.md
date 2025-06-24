@@ -1,8 +1,5 @@
 # Exception Tracking
 
-> [!NOTE]
-> If the `exception.enabled` option in `config/lamet.php` is set to `true`, exceptions will be automatically recorded. You don't need to manually call these methods unless you want custom exception tracking.
-
 Track exceptions and errors in your application.
 
 ## Common Use Cases
@@ -13,17 +10,19 @@ Track exceptions and errors in your application.
 - **Authentication Errors**: Monitor login failures
 
 ## Global Exception Handler
-
+By adding the metric in the global exception handler you will be able to capture every exceptions.Exceptions from the ignore list in `config/lamet.php` will be ignored. 
 ```php
 // In app/Exceptions/Handler.php
+use Itsemon245\Lamet\Metrics;
+
 public function register(): void
 {
     $this->reportable(function (Throwable $e) {
-        Metrics::exception($e, [
-            'user_id' => optional(auth()->user())->id,
-            'endpoint' => request()->path(),
+        Metrics::exception($e, tags: [
+            'user' => auth()->user() ? auth()->user()->email : null,
         ]);
     });
+
 }
 ```
 

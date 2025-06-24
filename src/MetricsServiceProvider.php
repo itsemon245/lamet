@@ -72,7 +72,7 @@ class MetricsServiceProvider extends ServiceProvider
         }
 
         // Register exception listener if enabled
-        if ($config['exception']['enabled'] ?? true) {
+        if ($config['exception']['enabled'] ?? false) {
             $this->app['events']->listen(
                 \Illuminate\Log\Events\MessageLogged::class,
                 function (\Illuminate\Log\Events\MessageLogged $event) {

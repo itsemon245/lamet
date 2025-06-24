@@ -124,7 +124,7 @@ class MetricsManager
         $line = 0;
 
         // Use improved backtrace to find the actual source
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 15);
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
 
         // Look for the first non-Laravel, non-metrics file
         foreach ($backtrace as $trace) {
