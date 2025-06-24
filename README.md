@@ -14,9 +14,6 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
 
 - [🚀 Installation](#-installation)
 - [✨ Usage](#-usage)
-  - [Using the Facade](#using-the-facade)
-  - [Using Helper Functions](#using-helper-functions)
-  - [Using Dependency Injection](#using-dependency-injection)
 - [📝 Notes](#-notes)
 - [📚 More](#-more)
 - [Commands](#commands)
@@ -118,83 +115,36 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
 
 ## ✨ Usage
 
-### Using the Facade
+### Basic Usage
+
+Record a simple metric using the facade:
 
 ```php
 use Itsemon245\Lamet\Facades\Metrics;
 
-// Record a metric (e.g., exception occurrence)
-Metrics::increment('exception.occurrence', 1, [
-    'exception_class' => get_class($exception),
-    'file' => $exception->getFile(),
-    'line' => $exception->getLine(),
-    'endpoint' => request()->path(),
-    'method' => request()->method(),
+// Record an API request
+Metrics::increment('api.requests', 1, [
+    'endpoint' => '/users',
+    'method' => 'GET',
+    'status_code' => 200
 ]);
-
-// Record HTTP request metrics in middleware
-Metrics::increment('http.requests', 1, [
-    'endpoint' => $request->path(),
-    'method' => $request->method(),
-    'status_code' => $response->getStatusCode(),
-]);
-
-// Time a function execution
-$result = Metrics::time('database.query', function () {
-    return User::where('active', true)->get();
-}, ['table' => 'users']);
-
-// Decrement a counter
-Metrics::decrement('active.users', 1);
 ```
 
-### Using Helper Functions
+### Available Methods
 
-```php
-// Record a metric
-metrics('user.login', 1, ['user_id' => 123]);
+- **Basic Metrics**: [Counter & Gauge Metrics](docs/basic-metrics.md)
+- **Timing**: [Time-based Metrics](docs/timing-metrics.md)
+- **Exceptions**: [Exception Tracking](docs/exception-tracking.md)
+- **Database**: [Database Query Monitoring](docs/database-monitoring.md)
+- **Cache Management**: [Cache Operations](docs/cache-management.md)
+- **Data Retrieval**: [Data Retrieval](docs/data-retrieval.md)
+- **Cleanup**: [Cleanup Operations](docs/cleanup-operations.md)
 
-// Increment a counter (defaults to 1)
-metrics('api.requests', tags: ['endpoint' => '/users']);
+Each method supports three usage patterns:
 
-// Time a function execution
-$result = metrics_time('database.query', function () {
-    return User::where('active', true)->get();
-}, ['table' => 'users']);
-
-// Increment/decrement helpers
-metrics_increment('active.users');
-metrics_decrement('active.users');
-
-// Flush cached metrics
-metrics_flush();
-
-// Get metrics from database
-$metrics = metrics_get(['name' => 'api.requests']);
-
-// Clean old metrics
-metrics_clean(30); // Keep last 30 days
-```
-
-### Using Dependency Injection
-
-```php
-use Itsemon245\Lamet\MetricsManager;
-
-class UserController extends Controller
-{
-    public function __construct(private MetricsManager $metrics)
-    {
-    }
-
-    public function index()
-    {
-        $this->metrics->increment('user.list.viewed');
-
-        return User::paginate();
-    }
-}
-```
+- **Facade**: `Metrics::methodName()`
+- **Helper Functions**: `metricsMethodName()`
+- **Dependency Injection**: Inject `MetricsManager`
 
 ---
 
@@ -209,7 +159,7 @@ For advanced usage and query examples, see:
 - The `tags` column is flexible and can store any key-value pairs.
 - The `recorded_at` column is used for time-series queries in Grafana.
 - The `type` column defaults to `counter` for all metrics.
-- The `unit` column is available for future use.
+- The `unit` column is available for any unit
 
 ## 📚 More
 
