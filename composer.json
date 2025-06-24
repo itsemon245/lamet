@@ -20,7 +20,9 @@
         "laravel-package"
     ],
     "require-dev": {
-        "orchestra/testbench": "^10.4"
+        "orchestra/testbench": "^10.4",
+        "pestphp/pest-plugin-laravel": "^3.2",
+        "pestphp/pest": "^3.8"
     },
     "license": "MIT",
     "autoload": {
@@ -37,8 +39,8 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit",
-        "test-f": "vendor/bin/phpunit --filter"
+        "test": "vendor/bin/pest",
+        "test-f": "vendor/bin/pest --filter"
     },
     "extra": {
         "laravel": {
@@ -54,5 +56,9 @@
         }
     ],
     "minimum-stability": "stable",
-    "require": {}
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
 }

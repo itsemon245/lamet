@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Lamet Test Suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="DB_CONNECTION" value="testing"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="LAMET_ENABLED" value="true"/>
+        <env name="LAMET_LOG" value="false"/>
+        <env name="LAMET_TABLE" value="lamet"/>
+        <env name="LAMET_DB_CONNECTION" value="testing"/>
+        <env name="LAMET_CACHE_STORE" value="array"/>
+        <env name="LAMET_CACHE_PREFIX" value="lamet_test:"/>
+    </php>
+</phpunit> 
