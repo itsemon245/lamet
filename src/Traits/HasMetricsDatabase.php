@@ -16,8 +16,8 @@ trait HasMetricsDatabase
             return;
         }
 
-        $connection = config('metrics.drivers.database.connection', 'sqlite');
-        $tableName = config('metrics.drivers.database.table', 'metrics');
+        $connection = $this->config['drivers']['database']['connection'] ?? 'sqlite';
+        $tableName = $this->config['drivers']['database']['table'] ?? 'metrics';
         $batchSize = $this->getCacheBatchSize();
 
         try {
@@ -63,22 +63,8 @@ trait HasMetricsDatabase
      */
     protected function determineMetricType(array $metric): string
     {
-        $name = $metric['name'] ?? '';
-
-        // Check for common metric type patterns
-        if (str_contains($name, 'count') || str_contains($name, 'total')) {
-            return 'counter';
-        }
-
-        if (str_contains($name, 'time') || str_contains($name, 'duration')) {
-            return 'histogram';
-        }
-
-        if (str_contains($name, 'rate') || str_contains($name, 'percentage')) {
-            return 'gauge';
-        }
-
-        return 'gauge';
+        // Default to 'counter' for current plan
+        return 'counter';
     }
 
     /**
@@ -86,26 +72,7 @@ trait HasMetricsDatabase
      */
     protected function determineMetricUnit(array $metric): ?string
     {
-        $name = $metric['name'] ?? '';
-        $value = $metric['value'] ?? 0;
-
-        // Check for common unit patterns
-        if (str_contains($name, 'time') || str_contains($name, 'duration')) {
-            return 'ms';
-        }
-
-        if (str_contains($name, 'memory') || str_contains($name, 'size')) {
-            return 'bytes';
-        }
-
-        if (str_contains($name, 'percentage') || str_contains($name, 'rate')) {
-            return '%';
-        }
-
-        if (str_contains($name, 'requests') || str_contains($name, 'count')) {
-            return 'requests';
-        }
-
+        // Default to null for current plan
         return null;
     }
 
@@ -114,8 +81,8 @@ trait HasMetricsDatabase
      */
     protected function getMetricsFromDatabase(array $filters = []): array
     {
-        $connection = config('metrics.drivers.database.connection', 'sqlite');
-        $tableName = config('metrics.drivers.database.table', 'metrics');
+        $connection = $this->config['drivers']['database']['connection'] ?? 'sqlite';
+        $tableName = $this->config['drivers']['database']['table'] ?? 'metrics';
 
         $query = DB::connection($connection)->table($tableName);
 
@@ -144,8 +111,8 @@ trait HasMetricsDatabase
      */
     protected function cleanOldMetrics(int $daysToKeep = 30): int
     {
-        $connection = config('metrics.drivers.database.connection', 'sqlite');
-        $tableName = config('metrics.drivers.database.table', 'metrics');
+        $connection = $this->config['drivers']['database']['connection'] ?? 'sqlite';
+        $tableName = $this->config['drivers']['database']['table'] ?? 'metrics';
 
         $cutoffDate = now()->subDays($daysToKeep);
 

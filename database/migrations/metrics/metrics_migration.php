@@ -21,7 +21,7 @@ return new class extends MetricsMigration
             // Use jsonb for PostgreSQL, json for others
             $this->addJsonColumn($table, 'tags');
 
-            $table->string('type', 50)->default('gauge')->index();
+            $table->string('type', 50)->default('counter')->index();
             $table->string('unit', 20)->nullable();
             $table->timestamp('recorded_at')->useCurrent()->index();
             $table->timestamps();

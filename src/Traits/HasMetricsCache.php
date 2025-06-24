@@ -11,10 +11,6 @@ trait HasMetricsCache
      */
     protected function cacheMetric(string $name, float $value, array $tags = []): void
     {
-        if (! $this->isCacheEnabled()) {
-            return;
-        }
-
         $cacheKey = $this->buildCacheKey($name, $tags);
         $metric = [
             'name' => $name,
@@ -47,10 +43,6 @@ trait HasMetricsCache
      */
     protected function getCachedMetrics(): array
     {
-        if (! $this->isCacheEnabled()) {
-            return [];
-        }
-
         $store = Cache::store($this->getCacheStore());
         $prefix = $this->getCachePrefix();
         $metrics = [];
@@ -74,10 +66,6 @@ trait HasMetricsCache
      */
     protected function clearCachedMetrics(): void
     {
-        if (! $this->isCacheEnabled()) {
-            return;
-        }
-
         $prefix = $this->getCachePrefix();
         $keys = $this->getCacheKeys($prefix);
 
@@ -105,14 +93,6 @@ trait HasMetricsCache
         // This is a simplified approach - in production with Redis you'd use SCAN
         // For now, we'll return an empty array and let the database driver handle it
         return [];
-    }
-
-    /**
-     * Check if cache is enabled.
-     */
-    protected function isCacheEnabled(): bool
-    {
-        return $this->config['cache']['enabled'] ?? false;
     }
 
     /**

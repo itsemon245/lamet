@@ -5,11 +5,10 @@ namespace Itsemon245\Metrics;
 use Illuminate\Contracts\Foundation\Application;
 use Itsemon245\Metrics\Traits\HasMetricsCache;
 use Itsemon245\Metrics\Traits\HasMetricsDatabase;
-use Itsemon245\Metrics\Traits\HasMetricsLogging;
 
 class MetricsManager
 {
-    use HasMetricsCache, HasMetricsDatabase, HasMetricsLogging;
+    use HasMetricsCache, HasMetricsDatabase;
 
     /**
      * The application instance.
@@ -35,18 +34,9 @@ class MetricsManager
      */
     public function record(string $name, float $value, array $tags = []): void
     {
-        if (! $this->isEnabled()) {
-            return;
-        }
-
         // Add default tags
         $tags = array_merge($this->getDefaultTags(), $tags);
-
-        // Store in cache first
         $this->cacheMetric($name, $value, $tags);
-
-        // Log if enabled
-        $this->logMetric($name, $value, $tags);
     }
 
     /**
@@ -71,7 +61,6 @@ class MetricsManager
     public function time(string $name, callable $callback, array $tags = []): mixed
     {
         $start = microtime(true);
-
         try {
             $result = $callback();
             $this->record($name, (microtime(true) - $start) * 1000, $tags);
@@ -89,11 +78,9 @@ class MetricsManager
     public function flush(): int
     {
         $metrics = $this->getCachedMetrics();
-
         if (empty($metrics)) {
             return 0;
         }
-
         $this->storeMetricsInDatabase($metrics);
         $this->clearCachedMetrics();
 
@@ -117,14 +104,6 @@ class MetricsManager
     }
 
     /**
-     * Check if metrics are enabled.
-     */
-    protected function isEnabled(): bool
-    {
-        return $this->config['enabled'] ?? true;
-    }
-
-    /**
      * Get default tags.
      */
     protected function getDefaultTags(): array
@@ -138,16 +117,5 @@ class MetricsManager
     public function getConfig(): array
     {
         return $this->config;
-    }
-
-    /**
-     * Check if the current database is PostgreSQL.
-     */
-    protected function isPostgreSQL(): bool
-    {
-        $connection = config('metrics.drivers.database.connection', 'sqlite');
-        $driver = config("database.connections.{$connection}.driver");
-
-        return $driver === 'pgsql';
     }
 }

@@ -54,12 +54,11 @@ return [
     |
     */
     'cache' => [
-        'enabled' => env('METRICS_CACHE_ENABLED', true),
         'store' => env('METRICS_CACHE_STORE', 'redis'),
         'prefix' => env('METRICS_CACHE_PREFIX', 'metrics:'),
-        'ttl' => env('METRICS_CACHE_TTL', 3600), // 1 hour in seconds
+        'ttl' => env('METRICS_CACHE_TTL', 3600),//should not be smaller than flush_interval
         'batch_size' => env('METRICS_CACHE_BATCH_SIZE', 1000),
-        'flush_interval' => env('METRICS_CACHE_FLUSH_INTERVAL', 300), // 5 minutes in seconds
+        'flush_interval' => env('METRICS_CACHE_FLUSH_INTERVAL', 300),
     ],
 
     /*
