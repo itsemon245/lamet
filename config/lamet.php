@@ -44,7 +44,8 @@ return [
     */
     'default_tags' => [
         'environment' => env('APP_ENV', 'production'),
-        'app_name' => env('APP_NAME', 'laravel'),
+        'app_url' => env('APP_URL', 'http://localhost'),
+        'debug_mode' => env('APP_DEBUG', false),
     ],
 
     /*
@@ -58,7 +59,7 @@ return [
     'db_query' => [
         'enabled' => env('LAMET_DB_QUERY_ENABLED', true),
         'metric_name' => 'db.query',
-        'tags' => ['sql', 'duration', 'file', 'line'],
+        'tags' => ['connection', 'sql', 'duration', 'file', 'line'],
         'separate_metric_for_slow_query' => env('LAMET_SLOW_QUERY_SEPARATE_METRIC', true),
         'slow_query_threshold' => env('LAMET_SLOW_QUERY_THRESHOLD', 1500), // in ms
     ],
@@ -74,6 +75,7 @@ return [
         'enabled' => env('LAMET_EXCEPTION_ENABLED', true),
         'metric_name' => 'exception.occurrence',
         'tags' => ['exception_class', 'message', 'file', 'line', 'code', 'trace'],
+        'trace_lines' => 15, // number of lines to take from the trace
     ],
 
     /*

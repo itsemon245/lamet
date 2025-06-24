@@ -158,6 +158,9 @@ class MetricsManager
         // Add configured tags
         foreach ($dbQueryConfig['tags'] ?? [] as $tag) {
             switch ($tag) {
+                case 'connection':
+                    $tags['connection'] = $event->connectionName;
+                    break;
                 case 'sql':
                     $tags['sql'] = $this->normalizeSql($sql);
                     break;
@@ -198,6 +201,7 @@ class MetricsManager
         }
 
         $exceptionConfig = $this->config['exception'] ?? [];
+        $traceLines = $exceptionConfig['trace_lines'] ?? 15;
         $metricName = $name ?? ($exceptionConfig['metric_name'] ?? 'exception.occurrence');
         $tags = $additionalTags;
 
@@ -221,10 +225,8 @@ class MetricsManager
                     break;
                 case 'trace':
                     if (method_exists($throwable, 'getTraceAsString')) {
-                        $trace = $throwable->getTraceAsString();
-                        if (strlen($trace) > 500) {
-                            $trace = substr($trace, 0, 497).'...';
-                        }
+                        $trace = str($throwable->getTraceAsString())->explode("\n")
+                            ->take($traceLines)->implode("\n");
                         $tags['trace'] = $trace;
                     }
                     break;
