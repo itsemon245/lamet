@@ -13,7 +13,7 @@ abstract class MetricsMigration extends Migration
      */
     public function getConnection(): ?string
     {
-        return config('lamet.drivers.database.connection', 'sqlite');
+        return config('lamet.connection', 'sqlite');
     }
 
     /**
@@ -35,7 +35,7 @@ abstract class MetricsMigration extends Migration
      */
     final public function getTableName(): string
     {
-        return config('lamet.drivers.database.table', 'lamet');
+        return config('lamet.table', 'lamet');
     }
 
     /**

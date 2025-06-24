@@ -27,11 +27,11 @@ return new class extends MetricsMigration
             $table->timestamps();
 
             // Optimized indexes for Grafana queries
-            $table->index(['name', 'recorded_at'], 'metrics_name_time_idx');
-            $table->index(['type', 'recorded_at'], 'metrics_type_time_idx');
+            $table->index(['name', 'recorded_at'], $this->getTableName().'_name_time_idx');
+            $table->index(['type', 'recorded_at'], $this->getTableName().'_type_time_idx');
 
             // Add GIN index for jsonb tags in PostgreSQL
-            $this->addJsonIndex($table, 'tags', 'metrics_tags_gin_index');
+            $this->addJsonIndex($table, 'tags', $this->getTableName().'_tags_gin_index');
         });
     }
 
