@@ -1,6 +1,40 @@
+![Laravel Metrics Banner](https://via.placeholder.com/1200x400/667eea/ffffff?text=Laravel+Metrics)
+
+<p align="center">
+ <a href="https://packagist.org/packages/itsemon245/laravel-metrics"><img src="https://img.shields.io/packagist/dt/itsemon245/laravel-metrics?style=for-the-badge&label=Downloads&color=61C9A8" alt="Total Downloads"></a>
+ <a href="https://packagist.org/packages/itsemon245/laravel-metrics"><img src="https://img.shields.io/packagist/v/itsemon245/laravel-metrics?style=for-the-badge&label=Version" alt="Latest Stable Version"></a>
+ <a href="https://packagist.org/packages/itsemon245/laravel-metrics"><img src="https://img.shields.io/packagist/l/itsemon245/laravel-metrics?style=for-the-badge&label=License" alt="License"></a>
+</p>
+
 # Laravel Metrics
 
 A simple, high-performance package to record and aggregate metrics in Laravel applications, ready for Grafana dashboards.
+
+## 📋 Table of Contents
+
+- [🚀 Installation](#-installation)
+- [✨ Usage](#-usage)
+  - [Using the Facade](#using-the-facade)
+  - [Using Helper Functions](#using-helper-functions)
+  - [Using Dependency Injection](#using-dependency-injection)
+- [📝 Notes](#-notes)
+- [📚 More](#-more)
+- [Commands](#commands)
+  - [metrics:install](#metricsinstall)
+  - [metrics:flush](#metricsflush)
+  - [metrics:clean](#metricsclean)
+- [Configuration](#configuration)
+- [Environment Variables](#environment-variables)
+- [Cache System](#cache-system)
+  - [Cache Configuration](#cache-configuration)
+- [Scheduled Tasks](#scheduled-tasks)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [License](#license)
+- [Grafana Integration](#grafana-integration)
+  - [Database as Data Source](#database-as-data-source)
+  - [Recommended Dashboard Panels](#recommended-dashboard-panels)
+  - [Alerting](#alerting)
 
 ## 🚀 Installation
 
@@ -23,6 +57,8 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
    - Set up your desired database connection in `config/database.php` (e.g., `sqlite`, `mysql`, `pgsql`). _Postgres is recommended_
    - Set up your cache store in `config/cache.php` (e.g., `redis`).
    - Update `config/metrics.php` to reference the correct `store`, `table`, and `connection` names.
+
+   > [!NOTE] > **Quick Setup**: Use the provided `misc/postgres-docker-compose.yml` example to quickly spin up a PostgreSQL container for development and testing and even production.
 
 4. **Run the migration:**
 
