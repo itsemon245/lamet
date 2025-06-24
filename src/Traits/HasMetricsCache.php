@@ -9,13 +9,15 @@ trait HasMetricsCache
     /**
      * Store a metric in cache.
      */
-    protected function cacheMetric(string $name, float $value, array $tags = []): void
+    protected function cacheMetric(string $name, float $value, array $tags = [], string $type = 'counter', ?string $unit = null): void
     {
-        $cacheKey = $this->buildCacheKey($name, $tags);
+        $cacheKey = $this->buildCacheKey($name, $tags, $type, $unit);
         $metric = [
             'name' => $name,
             'value' => $value,
             'tags' => $tags,
+            'type' => $type,
+            'unit' => $unit,
             'timestamp' => now()->toISOString(),
             'count' => 1,
         ];
@@ -46,11 +48,7 @@ trait HasMetricsCache
         $store = Cache::store($this->getCacheStore());
         $prefix = $this->getCachePrefix();
         $metrics = [];
-
-        // This is a simplified approach - in production you might want to use
-        // Redis SCAN or similar for better performance with large datasets
         $keys = $this->getCacheKeys($prefix);
-
         foreach ($keys as $key) {
             $metric = $store->get($key);
             if ($metric) {
@@ -68,7 +66,6 @@ trait HasMetricsCache
     {
         $prefix = $this->getCachePrefix();
         $keys = $this->getCacheKeys($prefix);
-
         foreach ($keys as $key) {
             Cache::store($this->getCacheStore())->forget($key);
         }
@@ -77,12 +74,14 @@ trait HasMetricsCache
     /**
      * Build cache key for a metric.
      */
-    protected function buildCacheKey(string $name, array $tags = []): string
+    protected function buildCacheKey(string $name, array $tags = [], string $type = 'counter', ?string $unit = null): string
     {
         $prefix = $this->getCachePrefix();
         $tagString = empty($tags) ? '' : ':'.md5(serialize($tags));
+        $typeString = $type ? ":$type" : '';
+        $unitString = $unit ? ":$unit" : '';
 
-        return $prefix.$name.$tagString;
+        return $prefix.$name.$tagString.$typeString.$unitString;
     }
 
     /**

@@ -16,8 +16,12 @@ trait HasMetricsDatabase
             return;
         }
 
-        $connection = $this->config['drivers']['database']['connection'] ?? 'sqlite';
-        $tableName = $this->config['drivers']['database']['table'] ?? 'metrics';
+        $connection = $this->config['connection'] ?? null;
+        $tableName = $this->config['table'] ?? 'metrics';
+        if (! $connection) {
+            // If no connection is set, do not store metrics
+            return;
+        }
         $batchSize = $this->getCacheBatchSize();
 
         try {
@@ -47,8 +51,8 @@ trait HasMetricsDatabase
                 'name' => $metric['name'],
                 'value' => $metric['value'],
                 'tags' => json_encode($metric['tags'] ?? []),
-                'type' => $this->determineMetricType($metric),
-                'unit' => $this->determineMetricUnit($metric),
+                'type' => $metric['type'] ?? 'counter',
+                'unit' => $metric['unit'] ?? null,
                 'recorded_at' => $metric['timestamp'] ?? now(),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -59,31 +63,15 @@ trait HasMetricsDatabase
     }
 
     /**
-     * Determine metric type based on name and value.
-     */
-    protected function determineMetricType(array $metric): string
-    {
-        // Default to 'counter' for current plan
-        return 'counter';
-    }
-
-    /**
-     * Determine metric unit based on name and value.
-     */
-    protected function determineMetricUnit(array $metric): ?string
-    {
-        // Default to null for current plan
-        return null;
-    }
-
-    /**
      * Get metrics from database.
      */
     protected function getMetricsFromDatabase(array $filters = []): array
     {
-        $connection = $this->config['drivers']['database']['connection'] ?? 'sqlite';
-        $tableName = $this->config['drivers']['database']['table'] ?? 'metrics';
-
+        $connection = $this->config['connection'] ?? null;
+        $tableName = $this->config['table'] ?? 'metrics';
+        if (! $connection) {
+            return [];
+        }
         $query = DB::connection($connection)->table($tableName);
 
         // Apply filters
@@ -111,9 +99,11 @@ trait HasMetricsDatabase
      */
     protected function cleanOldMetrics(int $daysToKeep = 30): int
     {
-        $connection = $this->config['drivers']['database']['connection'] ?? 'sqlite';
-        $tableName = $this->config['drivers']['database']['table'] ?? 'metrics';
-
+        $connection = $this->config['connection'] ?? null;
+        $tableName = $this->config['table'] ?? 'metrics';
+        if (! $connection) {
+            return 0;
+        }
         $cutoffDate = now()->subDays($daysToKeep);
 
         $deleted = DB::connection($connection)

@@ -57,7 +57,7 @@ class MetricsInstallCommand extends Command
 
         $this->line('1. Configure your database connection in <comment>config/database.php</comment>:');
         $this->newLine();
-        $this->line('   <comment>sqlite</comment> (recommended for metrics):');
+        $this->line('   <comment>sqlite</comment>:');
         $this->line('   ```php');
         $this->line('   \'sqlite\' => [');
         $this->line('       \'driver\' => \'sqlite\',');
@@ -66,9 +66,25 @@ class MetricsInstallCommand extends Command
         $this->line('   ],');
         $this->line('   ```');
         $this->newLine();
+        $this->line('   <comment>pgsql</comment> (recommended):');
+        $this->line('   ```php');
+        $this->line('   \'pgsql\' => [');
+        $this->line('       \'driver\' => \'pgsql\',');
+        $this->line('       \'host\' => env(\'DB_HOST\', \'127.0.0.1\'),');
+        $this->line('       \'port\' => env(\'DB_PORT\', \'5432\'),');
+        $this->line('       \'database\' => env(\'DB_DATABASE\', \'metrics\'),');
+        $this->line('       \'username\' => env(\'DB_USERNAME\', \'postgres\'),');
+        $this->line('       \'password\' => env(\'DB_PASSWORD\', \'\'),');
+        $this->line('       \'charset\' => \'utf8\',');
+        $this->line('       \'prefix\' => \'\',');
+        $this->line('       \'schema\' => \'public\',');
+        $this->line('       \'sslmode\' => \'prefer\',');
+        $this->line('   ],');
+        $this->line('   ```');
+        $this->newLine();
 
         $this->line('2. Set the database connection in your <comment>.env</comment> file:');
-        $this->line('   <comment>METRICS_DB_CONNECTION=sqlite</comment>');
+        $this->line('   <comment>METRICS_DB_CONNECTION=sqlite</comment> or <comment>METRICS_DB_CONNECTION=pgsql</comment>');
         $this->newLine();
 
         $this->line('3. Run the migrations:');

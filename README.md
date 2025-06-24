@@ -1,89 +1,144 @@
 # Laravel Metrics
 
-A simple package to record metrics in production at scale for Laravel applications.
+A simple, high-performance package to record and aggregate metrics in Laravel applications, ready for Grafana dashboards.
 
-## Installation
+## 🚀 Installation
 
-1. Install the package via Composer:
+1. **Install via Composer:**
 
-```bash
-composer require itsemon245/laravel-metrics
-```
+   ```bash
+   composer require itsemon245/laravel-metrics
+   ```
 
-2. Run the installation command:
+2. **Publish the configuration and migration:**
 
-```bash
-php artisan metrics:install
-```
+   ```bash
+   php artisan metrics:install
+   ```
 
-This command will:
+   This will publish `config/metrics.php` and the migration to `database/migrations/metrics/`.
 
-- Publish the configuration file to `config/metrics.php`
-- Publish migrations to `database/migrations/metrics/`
-- Display setup instructions
+3. **Configure your database and cache:**
 
-3. Configure your database connection in `config/database.php`:
+   - Set up your desired database connection in `config/database.php` (e.g., `sqlite`, `mysql`, `pgsql`). _Postgres is recommended_
+   - Set up your cache store in `config/cache.php` (e.g., `redis`).
+   - Update `config/metrics.php` to reference the correct `store`, `table`, and `connection` names.
 
-```php
-'sqlite' => [
-    'driver' => 'sqlite',
-    'database' => storage_path('logs/metrics.sqlite'),
-    'prefix' => '',
-],
-```
+4. **Run the migration:**
 
-4. Set the database connection in your `.env` file:
+   ```bash
+   php artisan migrate
+   ```
 
-```env
-METRICS_DB_CONNECTION=sqlite
-```
+5. **(Optional) Schedule periodic flushing:**
+   In `app/Console/Kernel.php`:
+   ```php
+   protected function schedule(Schedule $schedule): void
+   {
+       $schedule->command('metrics:flush')->everyFiveMinutes();
+   }
+   ```
 
-5. Run the migrations:
+## ✨ Usage
 
-```bash
-php artisan migrate
-```
-
-**Note**: The metrics migrations will automatically use the configured database connection (`METRICS_DB_CONNECTION`) and will be included in the standard Laravel migration process.
-
-### Creating Additional Metrics Migrations
-
-To create additional migrations for your metrics package, extend the `MetricsMigration` base class:
+### Using the Facade
 
 ```php
-<?php
+use Itsemon245\Metrics\Facades\Metrics;
 
-use Itsemon245\Metrics\Database\Migrations\MetricsMigration;
-use Illuminate\Database\Schema\Blueprint;
+// Record a metric (e.g., exception occurrence)
+Metrics::increment('exception.occurrence', 1, [
+    'exception_class' => get_class($exception),
+    'file' => $exception->getFile(),
+    'line' => $exception->getLine(),
+    'endpoint' => request()->path(),
+    'method' => request()->method(),
+]);
 
-return new class extends MetricsMigration
+// Record HTTP request metrics in middleware
+Metrics::increment('http.requests', 1, [
+    'endpoint' => $request->path(),
+    'method' => $request->method(),
+    'status_code' => $response->getStatusCode(),
+]);
+
+// Time a function execution
+$result = Metrics::time('database.query', function () {
+    return User::where('active', true)->get();
+}, ['table' => 'users']);
+
+// Decrement a counter
+Metrics::decrement('active.users', 1);
+```
+
+### Using Helper Functions
+
+```php
+// Record a metric
+metrics('user.login', 1, ['user_id' => 123]);
+
+// Increment a counter (defaults to 1)
+metrics('api.requests', tags: ['endpoint' => '/users']);
+
+// Time a function execution
+$result = metrics_time('database.query', function () {
+    return User::where('active', true)->get();
+}, ['table' => 'users']);
+
+// Increment/decrement helpers
+metrics_increment('active.users');
+metrics_decrement('active.users');
+
+// Flush cached metrics
+metrics_flush();
+
+// Get metrics from database
+$metrics = metrics_get(['name' => 'api.requests']);
+
+// Clean old metrics
+metrics_clean(30); // Keep last 30 days
+```
+
+### Using Dependency Injection
+
+```php
+use Itsemon245\Metrics\MetricsManager;
+
+class UserController extends Controller
 {
-    public function up(): void
+    public function __construct(private MetricsManager $metrics)
     {
-        $schema = $this->getMetricsSchema();
-
-        $schema->create('your_new_table', function (Blueprint $table) {
-            // Your table definition
-        });
     }
 
-    public function down(): void
+    public function index()
     {
-        $schema = $this->getMetricsSchema();
-        $schema->dropIfExists('your_new_table');
+        $this->metrics->increment('user.list.viewed');
+
+        return User::paginate();
     }
-};
+}
 ```
 
-This ensures all metrics migrations use the same database connection automatically.
+---
 
-### Database-Specific Features
+For advanced usage and query examples, see:
 
-The package automatically adapts to different database drivers:
+- [Query Examples](docs/query-examples.md) - Common SQL queries for Grafana
+- [Advanced Usage](docs/advance-usage.md) - Advanced metric types and patterns
+- [Grafana Queries](docs/grafana-queries.md) - Grafana-specific query examples
 
-- **PostgreSQL**: Uses `jsonb` columns with GIN indexes for better JSON query performance
-- **MySQL/SQLite**: Uses `json` columns with standard indexing
-- **Automatic Detection**: The migration system detects your database driver and applies appropriate optimizations
+## 📝 Notes
+
+- The `tags` column is flexible and can store any key-value pairs.
+- The `recorded_at` column is used for time-series queries in Grafana.
+- The `type` column defaults to `counter` for all metrics.
+- The `unit` column is available for future use.
+
+## 📚 More
+
+- See the published `config/metrics.php` for all options.
+- See the migration for the table structure.
+- For advanced usage, see the helper functions and artisan commands provided.
 
 ## Commands
 
@@ -131,68 +186,9 @@ The package configuration is located in `config/metrics.php`. You can customize 
 - `enabled`: Enable/disable metrics recording
 - `log_metrics`: Log metrics to Laravel's log system
 - `default_tags`: Default tags to add to all metrics
-- `driver`: The driver to use for sending metrics
-
-## Usage
-
-### Using the Facade
-
-```php
-use Itsemon245\Metrics\Facades\Metrics;
-
-// Record a metric
-Metrics::record('user.login', 1, ['user_id' => 123]);
-
-// Increment a counter
-Metrics::increment('api.requests', 1, ['endpoint' => '/users']);
-
-// Decrement a counter
-Metrics::decrement('active.users', 1);
-
-// Time a function execution
-$result = Metrics::time('database.query', function () {
-    return User::where('active', true)->get();
-}, ['table' => 'users']);
-```
-
-### Using Helper Functions
-
-```php
-// Record a metric
-metrics('user.login', 1, ['user_id' => 123]);
-
-// Increment a counter (defaults to 1)
-metrics('api.requests', tags: ['endpoint' => '/users']);
-
-// Time a function execution
-$result = metrics_time('database.query', function () {
-    return User::where('active', true)->get();
-}, ['table' => 'users']);
-
-// Increment/decrement helpers
-metrics_increment('active.users');
-metrics_decrement('active.users');
-```
-
-### Using Dependency Injection
-
-```php
-use Itsemon245\Metrics\MetricsManager;
-
-class UserController extends Controller
-{
-    public function __construct(private MetricsManager $metrics)
-    {
-    }
-
-    public function index()
-    {
-        $this->metrics->increment('user.list.viewed');
-
-        return User::paginate();
-    }
-}
-```
+- `cache`: Cache configuration (store, prefix, TTL, batch size, flush interval)
+- `table`: Database table name for storing metrics
+- `connection`: Database connection to use (null to disable database storage)
 
 ## Environment Variables
 
@@ -201,15 +197,13 @@ You can configure the package using these environment variables:
 ```env
 METRICS_ENABLED=true
 METRICS_LOG=false
-METRICS_DRIVER=database
-METRICS_DB_CONNECTION=sqlite
-METRICS_LOG_CHANNEL=daily
+METRICS_TABLE=metrics
+METRICS_DB_CONNECTION=null
 
 # Cache Configuration
-METRICS_CACHE_ENABLED=true
 METRICS_CACHE_STORE=redis
 METRICS_CACHE_PREFIX=metrics:
-METRICS_CACHE_TTL=3600
+METRICS_CACHE_TTL=3600 # must not be smaller than METRICS_CACHE_FLUSH_INTERVAL
 METRICS_CACHE_BATCH_SIZE=1000
 METRICS_CACHE_FLUSH_INTERVAL=300
 ```
@@ -225,7 +219,6 @@ The package includes a caching system that stores metrics in cache first, then p
 
 ### Cache Configuration
 
-- `METRICS_CACHE_ENABLED`: Enable/disable caching (default: true)
 - `METRICS_CACHE_STORE`: Cache store to use (default: redis)
 - `METRICS_CACHE_PREFIX`: Prefix for cache keys (default: metrics:)
 - `METRICS_CACHE_TTL`: Time to live for cached metrics (default: 3600 seconds)
@@ -242,8 +235,8 @@ protected function schedule(Schedule $schedule): void
     // Flush metrics every 5 minutes
     $schedule->command('metrics:flush')->everyFiveMinutes();
 
-    // Clean old metrics daily at 2 AM
-    $schedule->command('metrics:clean --days=30 --force')->dailyAt('02:00');
+    // Clean old metrics daily at 2 AM (keep last 90 days)
+    $schedule->command('metrics:clean --days=90 --force')->dailyAt('02:00');
 }
 ```
 
@@ -279,7 +272,6 @@ Connect your metrics database to Grafana:
 
    - **PostgreSQL**: Use the PostgreSQL data source
    - **MySQL**: Use the MySQL data source
-   - **SQLite**: Use the SQLite data source (via SQLite plugin)
 
 2. **Connection Settings**:
    ```
@@ -288,91 +280,6 @@ Connect your metrics database to Grafana:
    User: your-database-user
    Password: your-database-password
    ```
-
-### Example Grafana Queries
-
-#### Time Series Graph
-
-```sql
--- Response time over time
-SELECT
-    recorded_at as time,
-    value,
-    name as metric
-FROM metrics
-WHERE name = 'api.response_time'
-  AND recorded_at >= $__timeFrom()
-  AND recorded_at <= $__timeTo()
-ORDER BY recorded_at;
-```
-
-#### Counter Graph
-
-```sql
--- Request count over time
-SELECT
-    recorded_at as time,
-    value,
-    name as metric
-FROM metrics
-WHERE name = 'api.requests'
-  AND recorded_at >= $__timeFrom()
-  AND recorded_at <= $__timeTo()
-ORDER BY recorded_at;
-```
-
-#### Tag-based Filtering
-
-```sql
--- Filter by tags (PostgreSQL jsonb)
-SELECT
-    recorded_at as time,
-    value,
-    tags->>'endpoint' as endpoint
-FROM metrics
-WHERE name = 'api.response_time'
-  AND tags @> '{"endpoint": "/users"}'
-  AND recorded_at >= $__timeFrom()
-  AND recorded_at <= $__timeTo()
-ORDER BY recorded_at;
-```
-
-#### Multi-metric Dashboard
-
-```sql
--- Multiple metrics in one query
-SELECT
-    recorded_at as time,
-    value,
-    name as metric
-FROM metrics
-WHERE name IN ('api.response_time', 'api.requests', 'memory.usage')
-  AND recorded_at >= $__timeFrom()
-  AND recorded_at <= $__timeTo()
-ORDER BY recorded_at, name;
-```
-
-### Dashboard Variables
-
-Create dynamic dashboards with variables:
-
-#### Metric Names Variable
-
-```sql
-SELECT DISTINCT name FROM metrics ORDER BY name;
-```
-
-#### Tag Values Variable
-
-```sql
--- For PostgreSQL
-SELECT DISTINCT jsonb_object_keys(tags) as tag_key FROM metrics;
-
--- For MySQL/SQLite
-SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(tags, '$.endpoint')) as endpoint
-FROM metrics
-WHERE JSON_EXTRACT(tags, '$.endpoint') IS NOT NULL;
-```
 
 ### Recommended Dashboard Panels
 
@@ -394,4 +301,4 @@ WHERE name = 'api.response_time'
 HAVING avg(value) > 1000;  -- Alert if > 1 second
 ```
 
-## Scheduled Tasks
+For more Grafana query examples, see [Grafana Queries](docs/grafana-queries.md).
