@@ -45,7 +45,6 @@ return [
     'default_tags' => [
         'environment' => env('APP_ENV', 'production'),
         'app_name' => env('APP_NAME', 'laravel'),
-        'user'=> ['id', 'email'] # user fields to store if authenticated
     ],
 
     /*

@@ -4,6 +4,8 @@ namespace Itsemon245\Lamet;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Itsemon245\Lamet\Traits\HasMetricsCache;
 use Itsemon245\Lamet\Traits\HasMetricsDatabase;
 use Itsemon245\Lamet\Traits\HasMetricsLogging;
@@ -29,30 +31,73 @@ class MetricsManager
     {
         $this->app = $app;
         $this->config = $app['config']->get('lamet', []);
+        $this->cacheStore = Cache::store($this->getCacheStore());
     }
 
     /**
      * Record a metric.
      */
-    public function record(string $name, float $value, array $tags = [], ?string $type = null, ?string $unit = null): void
+    public function record(string $name, float $value, array $tags = [], ?string $type = null, ?string $unit = null): ?string
     {
+        $this->logger('Record method called', [
+            'name' => $name,
+            'value' => $value,
+            'tags' => $tags,
+            'type' => $type,
+            'unit' => $unit,
+        ]);
+
         if (! $this->isEnabled()) {
-            return;
+            $this->logger('Metrics disabled, returning null');
+
+            return null;
         }
+
+        $this->logger('Metrics enabled, proceeding');
+
+        $channel = $this->getLogChannel();
+        Log::channel($channel)->info('Is logging enabled: '.$this->isLoggingEnabled());
 
         // Check if we should ignore this metric based on current request path
         if ($this->shouldIgnorePath()) {
-            return;
+            $this->logger('Path should be ignored, returning null');
+
+            return null;
         }
+
+        $this->logger('Path not ignored, proceeding');
 
         // Add default tags
         $tags = array_merge($this->getDefaultTags(), $tags);
+        $this->logger('Default tags merged', ['final_tags' => $tags]);
+
         $type = $type ?? 'counter';
         $unit = $unit ?? null;
-        $this->cacheMetric($name, $value, $tags, $type, $unit);
+
+        $this->logger('About to cache metric', [
+            'name' => $name,
+            'value' => $value,
+            'tags' => $tags,
+            'type' => $type,
+            'unit' => $unit,
+        ]);
+
+        $cacheKey = $this->cacheMetric($name, $value, $tags, $type, $unit);
+
+        $this->logger('Metric cached', ['cache_key' => $cacheKey]);
+
         if ($this->isLoggingEnabled()) {
-            $this->logMetric($name, $value, $tags);
+            $this->logger('Logging enabled, calling logMetric');
+            $this->logMetric($name, $value, $tags, $cacheKey);
+        } else {
+            $this->logger('Logging disabled, skipping logMetric');
         }
+
+        Log::channel($channel)->info('Cache key: '.$cacheKey);
+
+        $this->logger('Record method completed', ['cache_key' => $cacheKey]);
+
+        return $cacheKey;
     }
 
     /**
@@ -74,17 +119,37 @@ class MetricsManager
         // Get SQL query
         $sql = $event->sql;
 
-        // Get file and line from the event's connection or fallback to debug_backtrace
-        $file = '';
+        // Get more accurate file and line information
+        $file = 'unknown';
         $line = 0;
 
-        // Try to get from backtrace since QueryExecuted event doesn't provide file/line directly
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
+        // Use improved backtrace to find the actual source
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 15);
+
+        // Look for the first non-Laravel, non-metrics file
         foreach ($backtrace as $trace) {
-            if (isset($trace['file']) &&
-                ! str_contains($trace['file'], 'vendor/laravel') &&
-                ! str_contains($trace['file'], 'MetricsManager.php')) {
-                $file = $trace['file'];
+            if (isset($trace['file'])) {
+                $filePath = $trace['file'];
+
+                // Skip Laravel framework files
+                if (str_contains($filePath, 'vendor/laravel/framework')) {
+                    continue;
+                }
+
+                // Skip metrics-related files
+                if (str_contains($filePath, 'MetricsManager.php') ||
+                    str_contains($filePath, 'MetricsServiceProvider.php') ||
+                    str_contains($filePath, 'HasMetrics')) {
+                    continue;
+                }
+
+                // Skip other vendor files
+                if (str_contains($filePath, 'vendor/')) {
+                    continue;
+                }
+
+                // Found a relevant file
+                $file = $filePath;
                 $line = $trace['line'];
                 break;
             }
@@ -250,7 +315,11 @@ class MetricsManager
      */
     protected function shouldIgnorePath(): bool
     {
+        $this->logger('shouldIgnorePath method called');
+
         if (! $this->app->bound('request')) {
+            $this->logger('Request not bound, returning false');
+
             return false;
         }
 
@@ -260,9 +329,13 @@ class MetricsManager
 
         foreach ($ignorePaths as $ignorePath) {
             if ($this->pathMatches($currentPath, $ignorePath)) {
+                $this->logger('Path matches ignore pattern', ['ignorePath' => $ignorePath]);
+
                 return true;
             }
         }
+
+        $this->logger('Path does not match any ignore patterns, returning false');
 
         return false;
     }
@@ -292,12 +365,15 @@ class MetricsManager
         // Handle wildcard patterns like /foo/*
         if (str_ends_with($pattern, '/*')) {
             $basePattern = rtrim($pattern, '/*');
+            $matches = str_starts_with($path, $basePattern);
 
-            return str_starts_with($path, $basePattern);
+            return $matches;
         }
 
         // Exact match
-        return $path === $pattern;
+        $matches = $path === $pattern;
+
+        return $matches;
     }
 
     /**
@@ -345,16 +421,7 @@ class MetricsManager
      */
     protected function getDefaultTags(): array
     {
-        $tags = $this->config['default_tags'] ?? [];
-        $userFields = $tags['user'] ?? [];
-        $user = auth()->user();
-        if ($user) {
-            foreach ($userFields as $field) {
-                $tags[$field] = $user->{$field} ?? null;
-            }
-        }
-
-        return $tags;
+        return $this->config['default_tags'] ?? [];
     }
 
     /**

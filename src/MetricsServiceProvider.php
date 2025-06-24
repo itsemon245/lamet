@@ -16,11 +16,11 @@ class MetricsServiceProvider extends ServiceProvider
             __DIR__.'/../config/lamet.php', 'lamet'
         );
 
-        $this->app->singleton('lamet', function ($app) {
+        $this->app->singleton('metrics', function ($app) {
             return new MetricsManager($app);
         });
 
-        $this->app->alias('lamet', MetricsManager::class);
+        $this->app->alias('metrics', MetricsManager::class);
     }
 
     /**
@@ -66,7 +66,7 @@ class MetricsServiceProvider extends ServiceProvider
             $this->app['events']->listen(
                 \Illuminate\Database\Events\QueryExecuted::class,
                 function (\Illuminate\Database\Events\QueryExecuted $event) {
-                    $this->app['lamet']->dbQuery($event);
+                    $this->app['metrics']->dbQuery($event);
                 }
             );
         }
@@ -77,7 +77,7 @@ class MetricsServiceProvider extends ServiceProvider
                 \Illuminate\Log\Events\MessageLogged::class,
                 function (\Illuminate\Log\Events\MessageLogged $event) {
                     if ($event->level === 'error' && $event->context['exception'] ?? null) {
-                        $this->app['lamet']->exception($event->context['exception']);
+                        $this->app['metrics']->exception($event->context['exception']);
                     }
                 }
             );

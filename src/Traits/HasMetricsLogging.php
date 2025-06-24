@@ -18,7 +18,7 @@ trait HasMetricsLogging
         $logData = [
             'name' => $name,
             'value' => $value,
-            'tags' => $tags,
+            'tags' => array_merge($this->getDefaultTags(), $tags),
             'timestamp' => now()->toISOString(),
         ];
 
@@ -59,5 +59,12 @@ trait HasMetricsLogging
     protected function getLogChannel(): string
     {
         return $this->config['drivers']['log']['channel'] ?? 'daily';
+    }
+
+    protected function logger(string $message, array $context = [])
+    {
+        if ($this->isLoggingEnabled()) {
+            Log::channel($this->getLogChannel())->info($message, $context);
+        }
     }
 }
