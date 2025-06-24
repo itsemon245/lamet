@@ -14,6 +14,8 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
 
 - [🚀 Installation](#-installation)
 - [✨ Usage](#-usage)
+  - [Basic Usage](#basic-usage)
+  - [Available Methods](#available-methods)
 - [📝 Notes](#-notes)
 - [📚 More](#-more)
 - [Commands](#commands)
@@ -23,15 +25,15 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
 - [Configuration](#configuration)
 - [Environment Variables](#environment-variables)
 - [Cache System](#cache-system)
-  - [Cache Configuration](#cache-configuration)
+  - [Cache Configuration](#cache-configuration-1)
 - [Scheduled Tasks](#scheduled-tasks)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
 - [Grafana Integration](#grafana-integration)
   - [Database as Data Source](#database-as-data-source)
   - [Recommended Dashboard Panels](#recommended-dashboard-panels)
   - [Alerting](#alerting)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## 🚀 Installation
 
@@ -210,10 +212,40 @@ Options:
 
 The package configuration is located in `config/lamet.php`. You can customize the following options:
 
+### General Settings
+
 - `enabled`: Enable/disable metrics recording
 - `log_metrics`: Log metrics to Laravel's log system
-- `default_tags`: Default tags to add to all metrics
-- `cache`: Cache configuration (store, prefix, TTL, batch size)
+- `default_tags`: Default tags to add to all metrics (environment, app_name, user fields)
+
+### Database Query Monitoring
+
+- `db_query.enabled`: Enable/disable database query monitoring
+- `db_query.metric_name`: Name for database query metrics
+- `db_query.tags`: Tags to include with database queries
+- `db_query.separate_metric_for_slow_query`: Create separate metrics for slow queries
+- `db_query.slow_query_threshold`: Threshold in milliseconds for slow queries
+
+### Exception Monitoring
+
+- `exception.enabled`: Enable/disable exception monitoring
+- `exception.metric_name`: Name for exception metrics
+- `exception.tags`: Tags to include with exception metrics
+
+### Ignore Configuration
+
+- `ignore.paths`: Array of paths to ignore when recording metrics
+- `ignore.exceptions`: Array of exception classes to ignore
+
+### Cache Configuration
+
+- `cache.store`: Cache store to use (default: redis)
+- `cache.prefix`: Prefix for cache keys (default: metrics:)
+- `cache.ttl`: Time to live for cached metrics (default: 3600 seconds)
+- `cache.batch_size`: Number of metrics to insert in one batch (default: 1000)
+
+### Database Settings
+
 - `table`: Database table name for storing metrics
 - `connection`: Database connection to use (null to disable database storage)
 
@@ -264,26 +296,6 @@ protected function schedule(Schedule $schedule): void
 }
 ```
 
-## Testing
-
-Run the test suite:
-
-```bash
-composer test
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-
 ## Grafana Integration
 
 The package is designed to work seamlessly with Grafana for creating beautiful dashboards and visualizations.
@@ -326,3 +338,23 @@ HAVING avg(value) > 1000;  -- Alert if > 1 second
 ```
 
 For more Grafana query examples, see [Grafana Queries](docs/grafana-queries.md).
+
+## Testing
+
+Run the test suite:
+
+```bash
+composer test
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

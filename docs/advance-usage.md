@@ -65,7 +65,7 @@ metrics('disk.free', 500, [
     'host' => gethostname(),
 ], 'gauge', 'GB');
 
-metrics_increment('user.signup', 1, [
+metricsIncrement('user.signup', 1, [
     'referrer' => 'newsletter',
 ], 'counter');
 ```

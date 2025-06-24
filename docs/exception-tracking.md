@@ -1,62 +1,9 @@
 # Exception Tracking
 
+> [!NOTE]
+> If the `exception.enabled` option in `config/lamet.php` is set to `true`, exceptions will be automatically recorded. You don't need to manually call these methods unless you want custom exception tracking.
+
 Track exceptions and errors in your application.
-
-## Facade Usage
-
-```php
-use Itsemon245\Lamet\Facades\Metrics;
-
-try {
-    $user = User::findOrFail($id);
-} catch (ModelNotFoundException $e) {
-    Metrics::exception($e, [
-        'user_id' => $id,
-        'endpoint' => request()->path()
-    ], 'user.not_found');
-    throw $e;
-}
-```
-
-## Helper Functions
-
-```php
-try {
-    $user = User::findOrFail($id);
-} catch (ModelNotFoundException $e) {
-    metricsException($e, [
-        'user_id' => $id,
-        'endpoint' => request()->path()
-    ], 'user.not_found');
-    throw $e;
-}
-```
-
-## Dependency Injection
-
-```php
-use Itsemon245\Lamet\MetricsManager;
-
-class UserController extends Controller
-{
-    public function __construct(private MetricsManager $metrics)
-    {
-    }
-
-    public function show($id)
-    {
-        try {
-            return User::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
-            $this->metrics->exception($e, [
-                'user_id' => $id,
-                'action' => 'show'
-            ]);
-            throw $e;
-        }
-    }
-}
-```
 
 ## Common Use Cases
 
@@ -85,9 +32,13 @@ public function register(): void
 The exception tracking automatically adds:
 
 - `exception_class`: Exception class name
-- `exception_message`: Exception message (truncated)
-- `exception_file`: File where exception occurred
-- `exception_line`: Line number where exception occurred
+- `message`: Exception message (truncated)
+- `file`: File where exception occurred
+- `line`: Line number where exception occurred
+- `code`: Error code of the exception
+- `trace`: Truncated Trace
+
+You can remove any of them in the `config/lamet.php` if you don't want
 
 ## Using the Facade
 
@@ -176,14 +127,3 @@ try {
     throw $e;
 }
 ```
-
-## Exception Tags
-
-The exception tracking automatically adds these tags:
-
-- `exception_class`: The class name of the exception
-- `exception_message`: The exception message (truncated to 200 characters)
-- `exception_file`: The file where the exception occurred
-- `exception_line`: The line number where the exception occurred
-
-You can add additional tags for better categorization and analysis.

@@ -1,26 +1,22 @@
 # Database Query Monitoring
 
-## Using the Facade
+> [!NOTE]
+> If the `db_query.enabled` option in `config/lamet.php` is set to `true`, database queries will be automatically monitored. You don't need to manually call these methods unless you want custom query tracking.
 
+## Usage:
 ```php
-use Itsemon245\Lamet\Facades\Metrics;
-use Illuminate\Database\Events\QueryExecuted;
+// In a service provider or middleware
+Event::listen(QueryExecuted::class, function (QueryExecuted $event) {
+    //Facade version
+    Metrics::dbQuery($event, [
+        'context' => 'manual_tracking',
+    ]);
 
-// Record a database query event
-Metrics::dbQuery($queryEvent, [
-    'custom_tag' => 'value',
-]);
-```
-
-## Using Helper Functions
-
-```php
-use Illuminate\Database\Events\QueryExecuted;
-
-// Record a database query event
-metricsDbQuery($queryEvent, [
-    'custom_tag' => 'value',
-]);
+    //Helper version
+    metricsDbQuery($event, [
+        'context' => 'manual_tracking',
+    ]);
+});
 ```
 
 ## Configuration
@@ -35,19 +31,6 @@ Database query monitoring is configured in `config/lamet.php`:
     'separate_metric_for_slow_queries' => true,
     'tags' => ['sql', 'duration', 'file', 'line'],
 ],
-```
-
-## Automatic Monitoring
-
-The package automatically monitors database queries when enabled. You can also manually record query events:
-
-```php
-// In a service provider or middleware
-Event::listen(QueryExecuted::class, function (QueryExecuted $event) {
-    Metrics::dbQuery($event, [
-        'context' => 'manual_tracking',
-    ]);
-});
 ```
 
 ## Query Tags
@@ -69,46 +52,4 @@ Queries exceeding the `slow_query_threshold` are automatically tagged and can be
     'slow_query_threshold' => 1000, // 1 second
     'separate_metric_for_slow_queries' => true,
 ],
-```
-
-## Use Cases
-
-### Performance Monitoring
-
-```php
-// Monitor specific database operations
-Event::listen(QueryExecuted::class, function (QueryExecuted $event) {
-    if (str_contains($event->sql, 'users')) {
-        Metrics::dbQuery($event, [
-            'table' => 'users',
-            'operation' => 'user_related_query',
-        ]);
-    }
-});
-```
-
-### Query Analysis
-
-```php
-// Track queries by table
-Event::listen(QueryExecuted::class, function (QueryExecuted $event) {
-    $table = extractTableFromSql($event->sql);
-    Metrics::dbQuery($event, [
-        'table' => $table,
-        'query_type' => getQueryType($event->sql),
-    ]);
-});
-```
-
-### Application Context
-
-```php
-// Add application context to queries
-Event::listen(QueryExecuted::class, function (QueryExecuted $event) {
-    Metrics::dbQuery($event, [
-        'user_id' => optional(auth()->user())->id,
-        'endpoint' => request()->path(),
-        'request_id' => request()->id(),
-    ]);
-});
 ```
