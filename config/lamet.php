@@ -72,7 +72,7 @@ return [
     |
     */
     'exception' => [
-        'enabled' => env('LAMET_EXCEPTION_ENABLED', false),// auto query listener is less accurate please follow the docs to get a more accurate exception metrics
+        'enabled' => env('LAMET_EXCEPTION_ENABLED', false), // auto query listener is less accurate please follow the docs to get a more accurate exception metrics
         'metric_name' => 'exception.occurrence',
         'tags' => ['exception_class', 'message', 'file', 'line', 'code', 'trace'],
         'trace_lines' => 15, // number of lines to take from the trace
@@ -113,7 +113,7 @@ return [
             'SomeNamespace\*',
         ],
 
-        'db_query' =>[
+        'db_query' => [
             /**
              * Ignore any queries that are made to the following tables.
              * NOTE: this will ignore any queries related to that table i.e(JOINs, SELECTs, UPDATEs, DELETEs, etc)
@@ -131,9 +131,9 @@ return [
              * - Only regex patterns are supported.
              */
             'sql_patterns' => [
-                '/^SELECT \* FROM information_schema\.tables$/',
-            ]
-        ]
+                '/information_schema.*/',
+            ],
+        ],
     ],
 
     /*

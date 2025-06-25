@@ -33,7 +33,7 @@ trait HasMetricsCache
             'tags' => $tags,
             'type' => $type,
             'unit' => $unit,
-            'timestamp' => now()->toISOString(),
+            'timestamp' => now()->toDateTimeString(),
             'count' => 1,
         ];
 

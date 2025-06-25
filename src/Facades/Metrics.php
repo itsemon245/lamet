@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static mixed exception(\Throwable $throwable, array $additionalTags = [], ?string $name = null)
  * @method static int flush()
  * @method static array getMetrics(array $filters = [])
- * @method static int clean(int $daysToKeep = 30)
+ * @method static int|string clean(int $daysToKeep = 30, bool $dryRun = false)
  * @method static array getConfig()
  *
  * @see \Itsemon245\Lamet\MetricsManager

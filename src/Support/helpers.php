@@ -94,8 +94,8 @@ if (! function_exists('metricsClean')) {
     /**
      * Clean old metrics from database.
      */
-    function metricsClean(int $daysToKeep = 30): int
+    function metricsClean(int $daysToKeep = 30, bool $dryRun = false): int|string
     {
-        return Metrics::clean($daysToKeep);
+        return Metrics::clean($daysToKeep, $dryRun);
     }
 }

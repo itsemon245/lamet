@@ -10,7 +10,10 @@ class LametFlushCommand extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'lamet:flush {--force : Force flush even if cache is disabled}';
+    protected $signature = 'lamet:flush 
+    {--force : Force flush even if cache is disabled}
+    {--dry-run : Dry run the command}
+    ';
 
     /**
      * The console command description.
@@ -25,6 +28,14 @@ class LametFlushCommand extends Command
         $this->info('Flushing cached metrics to database...');
 
         try {
+            if ($this->option('dry-run')) {
+                $this->info('Dry run mode enabled, no metrics will be flushed');
+                $unsavedKeysCount = count($metrics->getUnsavedKeys());
+                $this->info("Found {$unsavedKeysCount} unsaved keys");
+
+                return self::SUCCESS;
+            }
+
             $count = $metrics->flush();
 
             if ($count > 0) {

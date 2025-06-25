@@ -97,7 +97,7 @@ trait HasMetricsDatabase
     /**
      * Clean old metrics from database.
      */
-    protected function cleanOldMetrics(int $daysToKeep = 30): int
+    protected function cleanOldMetrics(int $daysToKeep = 30, bool $dryRun = false): int|string
     {
         $connection = $this->config['connection'] ?? null;
         $tableName = $this->config['table'] ?? 'metrics';
@@ -106,11 +106,17 @@ trait HasMetricsDatabase
         }
         $cutoffDate = now()->subDays($daysToKeep);
 
-        $deleted = DB::connection($connection)
+        $query = DB::connection($connection)
             ->table($tableName)
-            ->where('recorded_at', '<', $cutoffDate)
-            ->delete();
+            ->where('recorded_at', '<', $cutoffDate);
 
+        if ($dryRun) {
+            $this->logger('Dry run mode enabled, no metrics will be deleted');
+            $statement = $query->toSql(). ", ".json_encode($query->getBindings());
+            return $statement;
+        }
+
+        $deleted = $query->delete();
         Log::info("Cleaned {$deleted} old metrics from database");
 
         return $deleted;

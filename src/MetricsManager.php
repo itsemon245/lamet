@@ -5,9 +5,11 @@ namespace Itsemon245\Lamet;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\Cache;
+use Itsemon245\Lamet\Exceptions\LametException;
 use Itsemon245\Lamet\Traits\HasMetricsCache;
 use Itsemon245\Lamet\Traits\HasMetricsDatabase;
 use Itsemon245\Lamet\Traits\HasMetricsLogging;
+use Throwable;
 
 class MetricsManager
 {
@@ -36,62 +38,67 @@ class MetricsManager
     /**
      * Record a metric.
      */
-    public function record(string $name, float $value, array $tags = [], ?string $type = null, ?string $unit = null): ?string
+    public function record(string $name, float $value, array $tags = [], ?string $type = null, ?string $unit = null): mixed
     {
-        $this->logger('Record method called', [
-            'name' => $name,
-            'value' => $value,
-            'tags' => $tags,
-            'type' => $type,
-            'unit' => $unit,
-        ]);
+        try {
+            $this->logger('Record method called', [
+                'name' => $name,
+                'value' => $value,
+                'tags' => $tags,
+                'type' => $type,
+                'unit' => $unit,
+            ]);
 
-        if (! $this->isEnabled()) {
-            $this->logger('Metrics disabled, returning null');
+            if (! $this->isEnabled()) {
+                $this->logger('Metrics disabled, returning null');
 
-            return null;
+                return null;
+            }
+
+            $this->logger('Metrics enabled, proceeding');
+
+            // Check if we should ignore this metric based on current request path
+            if ($this->shouldIgnorePath()) {
+                $this->logger('Path should be ignored, returning null');
+
+                return null;
+            }
+
+            $this->logger('Path not ignored, proceeding');
+
+            // Add default tags
+            $tags = array_merge($this->getDefaultTags(), $tags);
+            $this->logger('Default tags merged', ['final_tags' => $tags]);
+
+            $type = $type ?? 'counter';
+            $unit = $unit ?? null;
+
+            $this->logger('About to cache metric', [
+                'name' => $name,
+                'value' => $value,
+                'tags' => $tags,
+                'type' => $type,
+                'unit' => $unit,
+            ]);
+
+            $cacheKey = $this->cacheMetric($name, $value, $tags, $type, $unit);
+
+            $this->logger('Metric cached', ['cache_key' => $cacheKey]);
+
+            if ($this->isLoggingEnabled()) {
+                $this->logger('Logging enabled, calling logMetric');
+                $this->logMetric($name, $value, $tags, $cacheKey);
+            } else {
+                $this->logger('Logging disabled, skipping logMetric');
+            }
+
+            $this->logger('Record method completed', ['cache_key' => $cacheKey]);
+
+            return $cacheKey;
+        } catch (Throwable $e) {
+            throw new LametException('Error recording metric named: '.$name, previous: $e);
         }
 
-        $this->logger('Metrics enabled, proceeding');
-
-        // Check if we should ignore this metric based on current request path
-        if ($this->shouldIgnorePath()) {
-            $this->logger('Path should be ignored, returning null');
-
-            return null;
-        }
-
-        $this->logger('Path not ignored, proceeding');
-
-        // Add default tags
-        $tags = array_merge($this->getDefaultTags(), $tags);
-        $this->logger('Default tags merged', ['final_tags' => $tags]);
-
-        $type = $type ?? 'counter';
-        $unit = $unit ?? null;
-
-        $this->logger('About to cache metric', [
-            'name' => $name,
-            'value' => $value,
-            'tags' => $tags,
-            'type' => $type,
-            'unit' => $unit,
-        ]);
-
-        $cacheKey = $this->cacheMetric($name, $value, $tags, $type, $unit);
-
-        $this->logger('Metric cached', ['cache_key' => $cacheKey]);
-
-        if ($this->isLoggingEnabled()) {
-            $this->logger('Logging enabled, calling logMetric');
-            $this->logMetric($name, $value, $tags, $cacheKey);
-        } else {
-            $this->logger('Logging disabled, skipping logMetric');
-        }
-
-        $this->logger('Record method completed', ['cache_key' => $cacheKey]);
-
-        return $cacheKey;
     }
 
     /**
@@ -306,9 +313,9 @@ class MetricsManager
     /**
      * Clean old metrics from database.
      */
-    public function clean(int $daysToKeep = 30): int
+    public function clean(int $daysToKeep = 30, bool $dryRun = false): int|string
     {
-        return $this->cleanOldMetrics($daysToKeep);
+        return $this->cleanOldMetrics($daysToKeep, $dryRun);
     }
 
     /**
@@ -329,6 +336,8 @@ class MetricsManager
         $ignorePaths = $this->config['ignore']['paths'] ?? [];
 
         foreach ($ignorePaths as $ignorePath) {
+            $ignorePath = trim($ignorePath, '/');
+            $currentPath = trim($currentPath, '/');
             if ($this->pathMatches($currentPath, $ignorePath)) {
                 $this->logger('Path matches ignore pattern', ['ignorePath' => $ignorePath]);
 
@@ -347,6 +356,7 @@ class MetricsManager
     protected function shouldIgnoreException(\Throwable $throwable): bool
     {
         $ignoreExceptions = $this->config['ignore']['exceptions'] ?? [];
+        $ignoreExceptions[] = LametException::class;
         $exceptionClass = get_class($throwable);
 
         foreach ($ignoreExceptions as $ignoreException) {
@@ -459,6 +469,7 @@ class MetricsManager
 
         // Check if query matches any ignored table names
         $ignoreTables = $ignoreDbQuery['tables'] ?? [];
+        $ignoreTables[] = $this->config['table'] ?? 'metrics';
         foreach ($ignoreTables as $table) {
             if ($this->sqlContainsTable($sql, $table)) {
                 return true;

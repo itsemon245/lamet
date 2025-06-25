@@ -10,7 +10,11 @@ class LametCleanCommand extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'lamet:clean {--days=30 : Number of days to keep} {--force : Force the operation}';
+    protected $signature = 'lamet:clean 
+    {--days=30 : Number of days to keep} 
+    {--force : Force the operation}
+    {--dry-run : Run the command without actually deleting any metrics}
+    ';
 
     /**
      * The console command description.
@@ -31,6 +35,13 @@ class LametCleanCommand extends Command
 
                 return self::SUCCESS;
             }
+        }
+
+        if ($this->option('dry-run')) {
+            $this->info('Dry run mode enabled, no metrics will be deleted');
+            $sql = $metrics->clean($days, true);
+            $this->info('SQL: '.$sql);
+            return self::SUCCESS;
         }
 
         $this->info("Cleaning metrics older than {$days} days...");
