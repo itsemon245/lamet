@@ -118,10 +118,16 @@ class MetricsManager
 
         $dbQueryConfig = $this->config['db_query'] ?? [];
         $metricName = $name ?? ($dbQueryConfig['metric_name'] ?? 'db.query');
+        $shouldStoreOnlySlowQuery = $dbQueryConfig['store_only_slow_query'] ?? true;
         $tags = $additionalTags;
 
         // Calculate duration in milliseconds
         $duration = $event->time;
+        $isQuerySlow = $duration >= ($dbQueryConfig['slow_query_threshold'] ?? 1500);
+        // skip if only slow query store is enabled and the query is not slow then skip
+        if ($shouldStoreOnlySlowQuery && ! $isQuerySlow) {
+            return;
+        }
 
         // Get SQL query
         $sql = $event->sql;
@@ -183,8 +189,6 @@ class MetricsManager
             }
         }
 
-        $isQuerySlow = $duration >= ($dbQueryConfig['slow_query_threshold'] ?? 1500);
-        $shouldStoreOnlySlowQuery = $dbQueryConfig['store_only_slow_query'] ?? true;
         if ($isQuerySlow) {
             $metricName = $metricName.$dbQueryConfig['slow_query_name_suffix'] ?? '.slow';
             if ($shouldStoreOnlySlowQuery) {
@@ -193,10 +197,7 @@ class MetricsManager
                 return;
             }
         }
-        // skip if only slow query store is enabled and the query is not slow then skip
-        if ($shouldStoreOnlySlowQuery && ! $isQuerySlow) {
-            return;
-        }
+
         $this->record($metricName, $duration, $tags, 'timer', 'ms');
     }
 

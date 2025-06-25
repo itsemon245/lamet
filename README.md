@@ -105,9 +105,11 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
    ```bash
    php artisan migrate
    ```
-> [!IMPORTANT]
-> The 5th step is very important. If you skip this your metrics won't be saved in the database.
-> Also keep in mind that you have to set the frequency lower than the ttl value in `config/lamet.php`
+
+   > [!IMPORTANT]
+   > The 5th step is very important. If you skip this your metrics won't be saved in the database.
+   > Also keep in mind that you have to set the frequency lower than the ttl value in `config/lamet.php`
+
 5. **Schedule periodic flushing:**
    In `app/Console/Kernel.php`:
    ```php
@@ -116,10 +118,10 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
        $schedule->command('lamet:flush')->everyFiveMinutes();
    }
    ```
->[!TIP]
-> Higher frequency means less granularity, not suitable for realtime metrics but lower memory usage
-> Lower frequency means more granularity, suitable for realtime metrics but higher memory usage
-> Keep it between 5-20 minutes in general.
+   > [!TIP]
+   > Higher frequency means less granularity, not suitable for realtime metrics but lower memory usage
+   > Lower frequency means more granularity, suitable for realtime metrics but higher memory usage
+   > Keep it between 5-20 minutes in general.
 
 ## ✨ Usage
 
@@ -199,6 +201,8 @@ php artisan lamet:flush
 
 Options:
 
+- `--dry-run`: Run the command without actually doing anything
+- `-P|--print`: Print the flush keys
 - `--force`: Force flush even if cache is disabled
 
 ### `lamet:clean`
@@ -211,6 +215,7 @@ php artisan lamet:clean
 
 Options:
 
+- `--dry-run`: Run the command without actually doing anything
 - `--days=30`: Number of days to keep (default: 30)
 - `--force`: Force the operation without confirmation
 
@@ -229,8 +234,9 @@ The package configuration is located in `config/lamet.php`. You can customize th
 - `db_query.enabled`: Enable/disable auto database query monitoring
 - `db_query.metric_name`: Name for database query metrics
 - `db_query.tags`: Tags to include with database queries
-- `db_query.separate_metric_for_slow_query`: Create separate metrics for slow queries
-- `db_query.slow_query_threshold`: Threshold in milliseconds for slow queries
+- `db_query.store_only_slow_query`: Store only slow queries (default: true)
+- `db_query.slow_query_name_suffix`: Suffix for slow query metric names (default: '.slow')
+- `db_query.slow_query_threshold`: Threshold in milliseconds for slow queries (default: 1500ms)
 
 ### Exception Monitoring
 
@@ -242,6 +248,8 @@ The package configuration is located in `config/lamet.php`. You can customize th
 
 - `ignore.paths`: Array of paths to ignore when recording metrics
 - `ignore.exceptions`: Array of exception classes to ignore
+- `ignore.db_query.tables`: Array of database tables to ignore when monitoring queries
+- `ignore.db_query.sql_patterns`: Array of regex patterns to ignore specific SQL queries
 
 ### Cache Configuration
 
