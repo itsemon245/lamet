@@ -112,6 +112,28 @@ return [
             ValidationException::class,
             'SomeNamespace\*',
         ],
+
+        'db_query' =>[
+            /**
+             * Ignore any queries that are made to the following tables.
+             * NOTE: this will ignore any queries related to that table i.e(JOINs, SELECTs, UPDATEs, DELETEs, etc)
+             */
+            'tables' => [
+                'migrations',
+                'jobs',
+                'failed_jobs',
+                'jobs_batches',
+                'jobs_batches_failed',
+                'jobs_batches_failed_jobs',
+            ],
+            /**
+             * Ignore any queries that match the following SQL patterns.
+             * - Only regex patterns are supported.
+             */
+            'sql_patterns' => [
+                '/^SELECT \* FROM information_schema\.tables$/',
+            ]
+        ]
     ],
 
     /*

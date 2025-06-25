@@ -5,7 +5,6 @@ namespace Itsemon245\Lamet;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Itsemon245\Lamet\Traits\HasMetricsCache;
 use Itsemon245\Lamet\Traits\HasMetricsDatabase;
 use Itsemon245\Lamet\Traits\HasMetricsLogging;
@@ -101,6 +100,11 @@ class MetricsManager
     public function dbQuery(QueryExecuted $event, array $additionalTags = [], ?string $name = null): void
     {
         if (! $this->isDbQueryEnabled()) {
+            return;
+        }
+
+        // Check if we should ignore this database query
+        if ($this->shouldIgnoreDbQuery($event)) {
             return;
         }
 
@@ -443,5 +447,64 @@ class MetricsManager
     protected function isExceptionEnabled(): bool
     {
         return $this->isEnabled() && ($this->config['exception']['enabled'] ?? true);
+    }
+
+    /**
+     * Check if a database query should be ignored.
+     */
+    protected function shouldIgnoreDbQuery(QueryExecuted $event): bool
+    {
+        $ignoreDbQuery = $this->config['ignore']['db_query'] ?? [];
+        $sql = $event->sql;
+
+        // Check if query matches any ignored table names
+        $ignoreTables = $ignoreDbQuery['tables'] ?? [];
+        foreach ($ignoreTables as $table) {
+            if ($this->sqlContainsTable($sql, $table)) {
+                return true;
+            }
+        }
+
+        // Check if query matches any ignored SQL patterns
+        $ignoreSqlPatterns = $ignoreDbQuery['sql_patterns'] ?? [];
+        foreach ($ignoreSqlPatterns as $pattern) {
+            if (preg_match($pattern, $sql)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if SQL query contains a specific table name.
+     */
+    protected function sqlContainsTable(string $sql, string $table): bool
+    {
+        // Normalize SQL for better matching
+        $normalizedSql = strtolower(trim($sql));
+        $tableName = strtolower($table);
+
+        // Check for table name in various SQL contexts
+        $patterns = [
+            "/\bfrom\s+`?{$tableName}`?\b/i",
+            "/\bjoin\s+`?{$tableName}`?\b/i",
+            "/\binto\s+`?{$tableName}`?\b/i",
+            "/\bupdate\s+`?{$tableName}`?\b/i",
+            "/\bdelete\s+from\s+`?{$tableName}`?\b/i",
+            "/\binsert\s+into\s+`?{$tableName}`?\b/i",
+            "/\btruncate\s+`?{$tableName}`?\b/i",
+            "/\bdrop\s+table\s+`?{$tableName}`?\b/i",
+            "/\bcreate\s+table\s+`?{$tableName}`?\b/i",
+            "/\balter\s+table\s+`?{$tableName}`?\b/i",
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $normalizedSql)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
