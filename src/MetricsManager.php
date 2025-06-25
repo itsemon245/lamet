@@ -5,6 +5,7 @@ namespace Itsemon245\Lamet;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Itsemon245\Lamet\Exceptions\LametException;
 use Itsemon245\Lamet\Traits\HasMetricsCache;
 use Itsemon245\Lamet\Traits\HasMetricsDatabase;
@@ -182,14 +183,21 @@ class MetricsManager
             }
         }
 
-        // Record the main query metric
-        $this->record($metricName, $duration, $tags, 'timer', 'ms');
+        $isQuerySlow = $duration >= ($dbQueryConfig['slow_query_threshold'] ?? 1500);
+        $shouldStoreOnlySlowQuery = $dbQueryConfig['store_only_slow_query'] ?? true;
+        if ($isQuerySlow) {
+            $metricName = $metricName.$dbQueryConfig['slow_query_name_suffix'] ?? '.slow';
+            if ($shouldStoreOnlySlowQuery) {
+                $this->record($metricName, $duration, $tags, 'timer', 'ms');
 
-        // Record separate metric for slow queries if enabled
-        if (($dbQueryConfig['separate_metric_for_slow_query'] ?? false) &&
-            $duration >= ($dbQueryConfig['slow_query_threshold'] ?? 1500)) {
-            $this->record($metricName.'.slow', $duration, $tags, 'timer', 'ms');
+                return;
+            }
         }
+        // skip if only slow query store is enabled and the query is not slow then skip
+        if ($shouldStoreOnlySlowQuery && ! $isQuerySlow) {
+            return;
+        }
+        $this->record($metricName, $duration, $tags, 'timer', 'ms');
     }
 
     /**
@@ -373,6 +381,21 @@ class MetricsManager
      */
     protected function pathMatches(string $path, string $pattern): bool
     {
+        // Handle regex patterns like /^api\/v\d+\/.*$/
+        if (str_starts_with($pattern, '/') && str_ends_with($pattern, '/')) {
+            try {
+                return preg_match($pattern, $path) === 1;
+            } catch (\Exception $e) {
+                // If regex is invalid, log it and fall back to exact match
+                $this->logger('Invalid regex pattern in ignore paths', [
+                    'pattern' => $pattern,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return $path === $pattern;
+            }
+        }
+
         // Handle wildcard patterns like /foo/*
         if (str_ends_with($pattern, '/*')) {
             $basePattern = rtrim($pattern, '/*');
@@ -432,7 +455,22 @@ class MetricsManager
      */
     protected function getDefaultTags(): array
     {
-        return $this->config['default_tags'] ?? [];
+        $tags = $this->config['default_tags'] ?? [];
+        $userFields = $tags['user'] ?? [];
+        // if (count($userFields) > 0) {
+        //     $user = auth()->user();
+        //     if ($user) {
+        //         foreach ($userFields as $field) {
+        //             $tags['user'][$field] = $user->{$field};
+        //         }
+        //     } else {
+        //         unset($tags['user']);
+        //     }
+        // }
+
+        // unset($tags['user']);
+
+        return $tags;
     }
 
     /**
@@ -466,6 +504,10 @@ class MetricsManager
     {
         $ignoreDbQuery = $this->config['ignore']['db_query'] ?? [];
         $sql = $event->sql;
+        $userGetSql = 'select * from `users` where `id` = ? limit 1';
+        if ($sql === $userGetSql) {
+            return true;
+        }
 
         // Check if query matches any ignored table names
         $ignoreTables = $ignoreDbQuery['tables'] ?? [];

@@ -13,6 +13,7 @@ class LametFlushCommand extends Command
     protected $signature = 'lamet:flush 
     {--force : Force flush even if cache is disabled}
     {--dry-run : Dry run the command}
+    {--P|print : Prints the unsaved keys}
     ';
 
     /**
@@ -28,10 +29,12 @@ class LametFlushCommand extends Command
         $this->info('Flushing cached metrics to database...');
 
         try {
+            $unsavedKeys = $metrics->getUnsavedKeys();
+            $unsavedKeysCount = count($unsavedKeys);
             if ($this->option('dry-run')) {
                 $this->info('Dry run mode enabled, no metrics will be flushed');
-                $unsavedKeysCount = count($metrics->getUnsavedKeys());
                 $this->info("Found {$unsavedKeysCount} unsaved keys");
+                $this->printUnsavedKeys($unsavedKeys);
 
                 return self::SUCCESS;
             }
@@ -40,6 +43,7 @@ class LametFlushCommand extends Command
 
             if ($count > 0) {
                 $this->info("✅ Successfully flushed {$count} metrics to database");
+                $this->printUnsavedKeys($unsavedKeys);
             } else {
                 $this->info('ℹ️  No cached metrics found to flush');
             }
@@ -51,5 +55,16 @@ class LametFlushCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    private function printUnsavedKeys(array $keys): void
+    {
+        if ($this->option('print')) {
+            if (count($keys) <= 0) {
+                return;
+            }
+            $this->info('Unsaved keys:');
+            $this->info(json_encode($keys, JSON_PRETTY_PRINT));
+        }
     }
 }

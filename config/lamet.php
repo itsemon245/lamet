@@ -60,7 +60,8 @@ return [
         'enabled' => env('LAMET_DB_QUERY_ENABLED', true),
         'metric_name' => 'db.query',
         'tags' => ['connection', 'sql', 'duration', 'file', 'line'],
-        'separate_metric_for_slow_query' => env('LAMET_SLOW_QUERY_SEPARATE_METRIC', true),
+        'store_only_slow_query' => env('LAMET_STORE_ONLY_SLOW_QUERY', true),
+        'slow_query_name_suffix' => env('LAMET_SLOW_QUERY_NAME_SUFFIX', '.slow'),
         'slow_query_threshold' => env('LAMET_SLOW_QUERY_THRESHOLD', 1500), // in ms
     ],
     /*
@@ -90,6 +91,7 @@ return [
         /**
          * - /foo/*: ignore all paths that start with foo/
          * - /foo/bar: ignore the exact path /foo/bar
+         * - /regex/ : any path that matches the regex
          */
         'paths' => [
             '/health',
