@@ -64,19 +64,19 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
 
    ```php
     'lamet' => [
-        'driver' => 'pgsql',
-        'url' => env('LAMET_DATABASE_URL'),
-        'host' => env('LAMET_DB_HOST', '127.0.0.1'),
-        'port' => env('LAMET_DB_PORT', '5432'),
-        'database' => env('LAMET_DB_DATABASE', 'lamet_metrics'),
-        'username' => env('LAMET_DB_USERNAME', 'root'),
-        'password' => env('LAMET_DB_PASSWORD', ''),
-        'charset' => 'utf8',
-        'prefix' => '',
-        'prefix_indexes' => true,
-        'search_path' => 'public',
-        'sslmode' => 'prefer',
-    ],
+         'driver' => env('LAMET_DB_CONNECTION', 'pgsql'),
+         'url' => env('LAMET_DATABASE_URL'),
+         'host' => env('LAMET_DB_HOST', '127.0.0.1'),
+         'port' => env('LAMET_DB_PORT', '5432'),
+         'database' => env('LAMET_DB_DATABASE', 'lamet_metrics'),
+         'username' => env('LAMET_DB_USERNAME', 'root'),
+         'password' => env('LAMET_DB_PASSWORD', ''),
+         'charset' => 'utf8',
+         'prefix' => '',
+         'prefix_indexes' => true,
+         'search_path' => env('LAMET_DB_CONNECTION', 'pgsql') === 'pgsql' ? 'public' : null,
+         'sslmode' => env('LAMET_DB_CONNECTION', 'pgsql') === 'pgsql' ? 'prefer' : null,
+     ],
    ```
 
    - Create a new cache store or use an existing one from `config/cache.php` (e.g., `redis`).
@@ -84,11 +84,12 @@ A simple, high-performance package to record and aggregate metrics in Laravel ap
 
    ```bash
    #Database Connection
+   LAMET_DB_CONNECTION=pgsql
    LAMET_DB_HOST=127.0.0.1
    LAMET_DB_PORT=5432
    LAMET_DB_DATABASE=lamet_metrics
    LAMET_DB_USERNAME=root
-   LAMET_DB_PASSWORD=
+   LAMET_DB_PASSWORD=password
 
    #Other Config options (these are the defaults)
    LAMET_CACHE_STORE=redis
